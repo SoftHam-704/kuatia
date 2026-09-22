@@ -137,14 +137,13 @@ export interface TenantRoute {
 }
 
 export async function resolveTenantRoute(masterEmpresaId: number): Promise<TenantRoute> {
-  /* 🔴 O filtro de produto vale nos DOIS gateways — por documento (login) e por
-     id (todo request autenticado). Filtrar só no login deixaria um token válido
-     rotear para o banco de outro produto. Ver RepOne V2 `postgres-gateways.ts`,
-     que aplica a cláusula nos dois. NUNCA remover. */
+  /* 🔴 O filtro de produto e bloqueio vale nos DOIS gateways — por documento
+     (login) e por id (todo request autenticado). Invariante 7 do
+     PADRAO-login-master-tenant: empresa bloqueada perde novas sessões imediatamente. */
   const result = await masterPool.query(
     `SELECT db_host, db_nome, db_usuario, db_senha, db_porta, db_schema
      FROM public.empresas
-     WHERE id = $1 AND status = 'ATIVO' AND db_nome = $2 LIMIT 1`,
+     WHERE id = $1 AND status = 'ATIVO' AND COALESCE(bloqueio_ativo, 'N') = 'N' AND db_nome = $2 LIMIT 1`,
     [masterEmpresaId, MASTER_PRODUCT_DB],
   );
   if (!result.rowCount) throw new Error('Tenant no disponible.');

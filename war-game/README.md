@@ -18,7 +18,8 @@
 | **Cancelamento** | ✅ Cancelamento com trava de baixas ativas e auditoria. Ver [`F10`](outputs/fases/F10-cancelamento-de-contas.md). |
 | **Planilhas** | ✅ Carga inicial em lote por CSV e Excel (.xlsx) com conferência e download de modelos. Ver [`F11`](outputs/fases/F11-importacao-planilhas.md). |
 | **Resultado Gerencial** | ✅ DRE unindo contas e lançamentos manuais de caixa com KPIs e isolamento de moedas. Ver [`F12`](outputs/fases/F12-resultado-gerencial-com-caixa.md). |
-| **Aberto** | L-05 (pools × Pgpool) · L-06 (nó fixo em vez do Pgpool) · D-09 (TLS) · D-12 (`bloqueio_ativo` no master) |
+| **Bloqueio Master** | ✅ D-12 executado no master (`bloqueio_ativo = 'N'` no tenant 120) e filtro ativo nos 2 gateways. |
+| **Aberto** | L-05 (pools × Pgpool) · L-06 (nó fixo em vez do Pgpool) · D-09 (TLS) |
 | **Repositório** | Git ativo e pareado: `https://github.com/SoftHam-704/kuatia.git` (`main`) |
 
 Relatório das fases executadas: [`outputs/fases/F0-F4-relatorio.md`](outputs/fases/F0-F4-relatorio.md) · [`outputs/fases/F9-flujo-caja-saldo-acumulado.md`](outputs/fases/F9-flujo-caja-saldo-acumulado.md) · [`outputs/fases/F10-cancelamento-de-contas.md`](outputs/fases/F10-cancelamento-de-contas.md) · [`outputs/fases/F11-importacao-planilhas.md`](outputs/fases/F11-importacao-planilhas.md) · [`outputs/fases/F12-resultado-gerencial-com-caixa.md`](outputs/fases/F12-resultado-gerencial-com-caixa.md)
@@ -34,8 +35,6 @@ como moldura, dock, `Ctrl+M` e `Alt+1..9`.
 Login: documento `01524628000259` · `hamilton` / `silva` / `admin123`.
 
 **Esperando você:**
-- `D-12` — o `UPDATE` do `bloqueio_ativo` no master (SQL pronto no ledger). O filtro no app está
-  escrito e **desligado** para não trancar o Pinheirão para fora.
 - `ADR-0020` — a decisão sobre o modal da IRIS (rascunho em `docs/pendente/`).
 
 **Próximo passo técnico, na minha ordem:**

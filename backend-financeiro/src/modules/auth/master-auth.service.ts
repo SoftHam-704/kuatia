@@ -103,6 +103,7 @@ export async function authenticateInMaster(input: MasterLoginInput): Promise<Aut
      FROM public.empresas
      WHERE regexp_replace(upper(cnpj), '[^0-9A-Z]', '', 'g') = $1
        AND status = 'ATIVO'
+       AND COALESCE(bloqueio_ativo, 'N') = 'N'
        AND db_nome = $2
      ORDER BY id
      LIMIT 1`,
