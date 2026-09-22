@@ -549,4 +549,33 @@ export const PT_BR: Record<string, string> = {
     'Base preparada para CSV e OFX; falta registrar um arquivo real do banco para mapear cada coluna e evitar interpretações incorretas.',
   'Cuando tengamos el primer extracto de cada banco, habilitamos su perfil de lectura, la conciliación asistida y la importación segura al Libro de Caja.':
     'Quando tivermos o primeiro extrato de cada banco, habilitaremos seu perfil de leitura, a conciliação assistida e a importação segura no Livro-Caixa.',
+
+  /* --- Carga inicial por planilla (Fase 11) --------------------------------------- */
+  'Carga inicial por planilla': 'Carga inicial por planilha',
+  'Carga inicial por planilla (CSV / Excel)': 'Carga inicial por planilha (CSV / Excel)',
+  'Cargá en lote clientes, proveedores o saldos iniciales de cuentas a pagar y cobrar.':
+    'Carregue em lote clientes, fornecedores ou saldos iniciais de contas a pagar e receber.',
+  'Tipo de planilla': 'Tipo de planilha',
+  'Cuentas por pagar (saldos iniciales)': 'Contas a pagar (saldos iniciais)',
+  'Cuentas por cobrar (saldos iniciales)': 'Contas a receber (saldos iniciais)',
+  'Descargá una planilla modelo con las columnas requeridas:': 'Baixe uma planilha modelo com as colunas exigidas:',
+  'Modelo Excel (.xlsx)': 'Modelo Excel (.xlsx)',
+  'Modelo CSV (.csv)': 'Modelo CSV (.csv)',
+  'Archivo de planilla (.xlsx, .csv)': 'Arquivo de planilha (.xlsx, .csv)',
+  'Leyendo y validando filas de la planilla…': 'Lendo e validando linhas da planilha…',
+  'Planilla analizada': 'Planilha analisada',
+  'Válidas': 'Válidas',
+  'Con error': 'Com erro',
+  'Las filas con error no serán importadas. Podés corregir la planilla o confirmar solo las válidas.':
+    'As linhas com erro não serão importadas. Você pode corrigir a planilha ou confirmar apenas as válidas.',
+  'Línea': 'Linha',
+  'Errores / Motivo': 'Erros / Motivo',
+  'Sin errores': 'Sem erros',
+  'Error': 'Erro',
+  'Válida': 'Válida',
+  'Confirmar importación ({n} válidas)': 'Confirmar importação ({n} válidas)',
+  'No se pudo leer la planilla.': 'Não foi possível ler a planilha.',
+  'No se pudo importar la planilla.': 'Não foi possível importar a planilha.',
+  'Planilla importada con éxito: {n} registros creados.': 'Planilha importada com sucesso: {n} registros criados.',
 };
+

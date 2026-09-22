@@ -14,6 +14,7 @@
      confirmar importa solo las válidas, informando las saltadas.
    ============================================================================ */
 
+import ExcelJS from 'exceljs';
 import type { Currency } from './currency.js';
 
 export type TipoPlanilla = 'CONTRAPARTES' | 'CUENTAS_PAGAR' | 'CUENTAS_COBRAR';
@@ -245,3 +246,103 @@ export function parsePlanilla(tipo: TipoPlanilla, text: string): { filas: Array<
   const conError = filas.filter((fila) => fila.errores.length > 0).length;
   return { filas, validas: filas.length - conError, conError };
 }
+
+/* --- XLSX & Modelos de Planilla ------------------------------------------- */
+
+/** Convierte el buffer de un archivo Excel (.xlsx) en texto CSV compatible con parsePlanilla. */
+export async function parseXlsxBuffer(buffer: Buffer): Promise<string> {
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(buffer as unknown as ExcelJS.Buffer);
+  const worksheet = workbook.worksheets[0];
+  if (!worksheet) throw new Error('El archivo Excel no contiene hojas de cálculo.');
+
+  const lines: string[] = [];
+  const colCount = Math.max(worksheet.columnCount || 0, 10);
+
+  worksheet.eachRow({ includeEmpty: false }, (row) => {
+    const cells: string[] = [];
+    const maxCol = Math.max(row.cellCount, colCount);
+    for (let col = 1; col <= maxCol; col += 1) {
+      const cell = row.getCell(col);
+      let cellText = '';
+      if (cell.value !== null && cell.value !== undefined) {
+        if (cell.value instanceof Date) {
+          const y = cell.value.getUTCFullYear();
+          const m = String(cell.value.getUTCMonth() + 1).padStart(2, '0');
+          const d = String(cell.value.getUTCDate()).padStart(2, '0');
+          cellText = `${y}-${m}-${d}`;
+        } else if (typeof cell.value === 'object') {
+          if ('text' in cell.value && typeof (cell.value as { text: unknown }).text === 'string') {
+            cellText = (cell.value as { text: string }).text;
+          } else if ('result' in cell.value && (cell.value as { result: unknown }).result !== null && (cell.value as { result: unknown }).result !== undefined) {
+            cellText = String((cell.value as { result: unknown }).result);
+          } else {
+            cellText = String(cell.value);
+          }
+        } else {
+          cellText = String(cell.value);
+        }
+      }
+      cells.push(cellText.trim());
+    }
+
+    // Suprime celdas vacías al final de la fila
+    while (cells.length > 0 && cells[cells.length - 1] === '') {
+      cells.pop();
+    }
+    if (cells.some((c) => c !== '')) {
+      lines.push(cells.map((c) => `"${c.replace(/"/g, '""')}"`).join(';'));
+    }
+  });
+
+  return lines.join('\n');
+}
+
+export function generateTemplateCsv(tipo: TipoPlanilla): string {
+  const headers = ENCABEZADOS[tipo];
+  let sample = '';
+  if (tipo === 'CONTRAPARTES') {
+    sample = 'J;80012345-6;Proveedor Ejemplo SA;Ejemplo SA;Asunción;021-123456;0981-123456;contacto@ejemplo.com.py\nF;4567890-1;Juan Pérez;Pérez Servicios;Ciudad del Este;061-555123;;juan@servicios.com.py';
+  } else if (tipo === 'CUENTAS_PAGAR') {
+    sample = 'Alquiler oficina central;FAC-001-002;Proveedor Ejemplo SA;PYG;1.500.000;2026-09-01;2026-09-30;1\nServidor cloud;INV-9821;Amazon Web Services;USD;250,00;2026-09-05;2026-09-20;1';
+  } else {
+    sample = 'Venta de productos;FAC-001-500;Cliente Ejemplo SRL;PYG;3.500.000;2026-09-01;2026-09-15;2\nServicios de consultoría;FAC-001-501;Comercial del Este;USD;1.200,00;2026-09-10;2026-09-25;1';
+  }
+  return headers.join(';') + '\n' + sample + '\n';
+}
+
+export async function generateTemplateXlsx(tipo: TipoPlanilla): Promise<Buffer> {
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'Kuatia';
+  workbook.created = new Date();
+  const sheet = workbook.addWorksheet('Plantilla');
+  const headers = ENCABEZADOS[tipo];
+
+  const headerRow = sheet.addRow(headers);
+  headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+  headerRow.fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FF1F2937' },
+  };
+  headerRow.alignment = { vertical: 'middle' };
+
+  if (tipo === 'CONTRAPARTES') {
+    sheet.addRow(['J', '80012345-6', 'Proveedor Ejemplo SA', 'Ejemplo SA', 'Asunción', '021-123456', '0981-123456', 'contacto@ejemplo.com.py']);
+    sheet.addRow(['F', '4567890-1', 'Juan Pérez', 'Pérez Servicios', 'Ciudad del Este', '061-555123', '', 'juan@servicios.com.py']);
+  } else if (tipo === 'CUENTAS_PAGAR') {
+    sheet.addRow(['Alquiler oficina central', 'FAC-001-002', 'Proveedor Ejemplo SA', 'PYG', '1.500.000', '2026-09-01', '2026-09-30', 1]);
+    sheet.addRow(['Servidor cloud', 'INV-9821', 'Amazon Web Services', 'USD', '250,00', '2026-09-05', '2026-09-20', 1]);
+  } else {
+    sheet.addRow(['Venta de productos', 'FAC-001-500', 'Cliente Ejemplo SRL', 'PYG', '3.500.000', '2026-09-01', '2026-09-15', 2]);
+    sheet.addRow(['Servicios de consultoría', 'FAC-001-501', 'Comercial del Este', 'USD', '1.200,00', '2026-09-10', '2026-09-25', 1]);
+  }
+
+  sheet.columns.forEach((column) => {
+    column.width = 22;
+  });
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  return Buffer.from(buffer);
+}
+

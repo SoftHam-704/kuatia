@@ -3,7 +3,13 @@ import { createHash } from 'node:crypto';
 import { z } from 'zod';
 import { withTenantContext } from '../../config/database.js';
 import { parseSifenPurchaseXml } from '../../domain/sifen-import.js';
-import { addMonths, parsePlanilla } from '../../domain/spreadsheet-import.js';
+import {
+  addMonths,
+  generateTemplateCsv,
+  generateTemplateXlsx,
+  parsePlanilla,
+  parseXlsxBuffer,
+} from '../../domain/spreadsheet-import.js';
 import type { ContrapartePlanilla, CuentaPlanilla, TipoPlanilla } from '../../domain/spreadsheet-import.js';
 import { splitMinorAmount } from '../../domain/installments.js';
 import { assertAllBusinessDates, asMinorUnit } from '../../domain/validation.js';
@@ -87,16 +93,56 @@ router.get('/extractos-bancarios/capacidades', authenticate, (_request, response
 const planillaSchema = z.object({
   empresaId: z.number().int().positive(),
   tipo: z.enum(['CONTRAPARTES', 'CUENTAS_PAGAR', 'CUENTAS_COBRAR']),
-  csv: z.string().min(10).max(5_000_000),
+  csv: z.string().min(10).max(5_000_000).optional(),
+  archivoBase64: z.string().min(10).max(10_000_000).optional(),
+}).refine((data) => data.csv || data.archivoBase64, {
+  message: 'Debe proporcionar csv o archivoBase64.',
 });
 
-router.post('/planilla/preview', authenticate, (request, response) => {
+async function resolveCsvContent(input: { csv?: string; archivoBase64?: string }): Promise<string> {
+  if (input.csv) return input.csv;
+  if (input.archivoBase64) {
+    const buffer = Buffer.from(input.archivoBase64, 'base64');
+    return await parseXlsxBuffer(buffer);
+  }
+  throw new Error('No se proporcionó archivo CSV ni Excel.');
+}
+
+const plantillaQuerySchema = z.object({
+  tipo: z.enum(['CONTRAPARTES', 'CUENTAS_PAGAR', 'CUENTAS_COBRAR']),
+  formato: z.enum(['csv', 'xlsx']).default('xlsx'),
+});
+
+router.get('/planilla/plantilla', authenticate, async (request, response) => {
+  try {
+    const query = plantillaQuerySchema.parse(request.query);
+    const filename = `plantilla_${query.tipo.toLowerCase()}.${query.formato}`;
+
+    if (query.formato === 'csv') {
+      const csv = generateTemplateCsv(query.tipo);
+      response.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      response.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      response.send(csv);
+    } else {
+      const buffer = await generateTemplateXlsx(query.tipo);
+      response.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      response.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      response.send(buffer);
+    }
+  } catch (error) {
+    response.status(400).json({ message: error instanceof z.ZodError ? 'Parámetros de plantilla inválidos.' : (error as Error).message });
+  }
+});
+
+router.post('/planilla/preview', authenticate, async (request, response) => {
   try {
     const input = planillaSchema.parse(request.body);
-    const parsed = parsePlanilla(input.tipo, input.csv);
+    const csv = await resolveCsvContent(input);
+    const parsed = parsePlanilla(input.tipo, csv);
     response.json({
       data: {
         ...parsed,
+        csv,
         filas: parsed.filas.map((fila) => ({
           ...fila,
           datos: fila.datos && 'valorTotalMinor' in fila.datos
@@ -114,8 +160,9 @@ router.post('/planilla/confirmar', authenticate, async (request, response) => {
   try {
     const input = planillaSchema.parse(request.body);
     const auth = request.auth!;
-    const hash = createHash('sha256').update(input.csv).digest('hex');
-    const parsed = parsePlanilla(input.tipo, input.csv);
+    const csv = await resolveCsvContent(input);
+    const hash = createHash('sha256').update(csv).digest('hex');
+    const parsed = parsePlanilla(input.tipo, csv);
     const validas = parsed.filas.filter((fila) => fila.datos !== null);
     const saltadas = parsed.filas.filter((fila) => fila.datos === null).map((fila) => ({ linea: fila.linea, errores: fila.errores }));
 

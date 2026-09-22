@@ -2,10 +2,13 @@ import { describe, expect, it } from 'vitest';
 import {
   addMonths,
   detectSeparator,
+  generateTemplateCsv,
+  generateTemplateXlsx,
   parseCsv,
   parseFechaHumana,
   parseImporteHumano,
   parsePlanilla,
+  parseXlsxBuffer,
 } from '../src/domain/spreadsheet-import.js';
 
 describe('detectSeparator', () => {
@@ -93,3 +96,30 @@ describe('parsePlanilla', () => {
     expect(result.conError).toBe(1);
   });
 });
+
+describe('generateTemplateCsv & generateTemplateXlsx', () => {
+  it('genera CSV con encabezados y datos de muestra para los 3 tipos', () => {
+    for (const tipo of ['CONTRAPARTES', 'CUENTAS_PAGAR', 'CUENTAS_COBRAR'] as const) {
+      const csv = generateTemplateCsv(tipo);
+      expect(csv).toContain(';');
+      const parsed = parsePlanilla(tipo, csv);
+      expect(parsed.validas).toBeGreaterThanOrEqual(1);
+      expect(parsed.conError).toBe(0);
+    }
+  });
+
+  it('genera XLSX válido que puede ser leído por parseXlsxBuffer', async () => {
+    for (const tipo of ['CONTRAPARTES', 'CUENTAS_PAGAR', 'CUENTAS_COBRAR'] as const) {
+      const buffer = await generateTemplateXlsx(tipo);
+      expect(buffer).toBeInstanceOf(Buffer);
+      expect(buffer.length).toBeGreaterThan(1000);
+
+      const csvFromXlsx = await parseXlsxBuffer(buffer);
+      expect(csvFromXlsx).toContain(';');
+      const parsed = parsePlanilla(tipo, csvFromXlsx);
+      expect(parsed.validas).toBeGreaterThanOrEqual(1);
+      expect(parsed.conError).toBe(0);
+    }
+  });
+});
+
