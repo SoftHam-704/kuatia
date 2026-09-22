@@ -4,6 +4,7 @@ import type { CurrencyCode } from '../design-system/format';
 import { ApiError, apiGet } from '../lib/api';
 import { createCuenta } from '../lib/operations';
 import { Modal } from './Modal';
+import { useWorkspaceWindow } from '../app/WorkspaceContext';
 import { useI18n } from '../i18n/useI18n';
 import { t as tMsg } from '../i18n/translate';
 
@@ -69,6 +70,32 @@ export function CuentaForm({ tipo, token, empresaId, onDone, onClose }: { tipo: 
     : [];
   const filteredPlans = plans.filter((item) => tipo === 'pagar' ? item.naturaleza === 'D' : item.naturaleza === 'R');
 
+  const win = useWorkspaceWindow();
+  const isDirty = Boolean(
+    descripcion.trim() ||
+    documento.trim() ||
+    importe.trim() ||
+    planId ||
+    centerId ||
+    contactId ||
+    cantidadCuotas !== '1' ||
+    emision !== today ||
+    vencimiento !== today
+  );
+
+  useEffect(() => {
+    win?.setDirty(isDirty);
+    return () => {
+      win?.setDirty(false);
+    };
+  }, [isDirty, win]);
+
+  function handleClose() {
+    if (isDirty && !window.confirm(t('Hay cambios sin guardar. ¿Cerrar igual?'))) return;
+    win?.setDirty(false);
+    onClose();
+  }
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError('');
@@ -85,6 +112,7 @@ export function CuentaForm({ tipo, token, empresaId, onDone, onClose }: { tipo: 
         centroCostoId: centerId ? Number(centerId) : undefined, contraparteId: contactId ? Number(contactId) : undefined,
         cuotas: splitInstallments(minor, count, vencimiento),
       });
+      win?.setDirty(false);
       onDone();
       onClose();
     } catch (failure) {
@@ -94,7 +122,7 @@ export function CuentaForm({ tipo, token, empresaId, onDone, onClose }: { tipo: 
     }
   }
 
-  return <Modal title={title} onClose={onClose}><form className="ds-modal__body" onSubmit={submit}>
+  return <Modal title={title} onClose={handleClose}><form className="ds-modal__body" onSubmit={submit}>
     <div className="ds-field"><label className="ds-label" htmlFor="cuenta-descripcion">{t('Descripción')}</label><input id="cuenta-descripcion" className="ds-input" value={descripcion} onChange={(event) => setDescripcion(event.target.value)} placeholder={tipo === 'pagar' ? t('Ej.: Alquiler de agosto') : t('Ej.: Venta a crédito')} required autoFocus /></div>
     <div className="ds-form-grid">
       <div className="ds-field ds-col-6"><label className="ds-label" htmlFor="cuenta-documento">{t('Documento (opcional)')}</label><input id="cuenta-documento" className="ds-input" value={documento} onChange={(event) => setDocumento(event.target.value)} /></div>
@@ -112,6 +140,6 @@ export function CuentaForm({ tipo, token, empresaId, onDone, onClose }: { tipo: 
       ? t('{n} cuota por {valor}.', { n: cuotasPreview.length, valor: formatMinor(cuotasPreview[0].valorMinor, moneda) })
       : t('{n} cuotas por {valor} (el ajuste mínimo queda en las primeras cuotas).', { n: cuotasPreview.length, valor: formatMinor(cuotasPreview[0].valorMinor, moneda) })}</p><p>{t('Primera: {primera} · Última: {ultima}', { primera: cuotasPreview[0].fechaVencimiento, ultima: cuotasPreview.at(-1)?.fechaVencimiento ?? '' })}</p></div></div>}
     {error && <div className="ds-alert ds-alert--danger" role="alert"><div className="ds-alert__body"><p>{error}</p></div></div>}
-    <footer className="ds-modal__footer"><button type="button" className="ds-btn ds-btn--secondary" onClick={onClose}>{t('Cancelar')}</button><button type="submit" className="ds-btn ds-btn--primary" disabled={saving}>{saving ? t('Guardando…') : t('Guardar cuenta')}</button></footer>
+    <footer className="ds-modal__footer"><button type="button" className="ds-btn ds-btn--secondary" onClick={handleClose}>{t('Cancelar')}</button><button type="submit" className="ds-btn ds-btn--primary" disabled={saving}>{saving ? t('Guardando…') : t('Guardar cuenta')}</button></footer>
   </form></Modal>;
 }

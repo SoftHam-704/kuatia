@@ -1,4 +1,4 @@
-import { apiGet, apiPost } from './api';
+import { apiGet, apiPost, apiPatch } from './api';
 import type { CurrencyCode } from '../design-system/format';
 
 /* Telas operacionais: contas a pagar, a cobrar, caixa e consolidado.
@@ -18,6 +18,10 @@ export interface Cuenta {
   saldoMinor: string;
   fechaEmision: string;
   fechaVencimiento: string;
+  contraparteId: number | null;
+  cuentaPlanId: number | null;
+  centroCostoId: number | null;
+  observaciones: string | null;
   cuotas: number;
   cuotasPendientes: number;
   cuotaPendienteId: string | null;
@@ -38,6 +42,10 @@ interface CuentaRow {
   saldo_minor: string;
   fecha_emision: string;
   fecha_vencimiento: string;
+  contraparte_id?: string | number | null;
+  cuenta_plan_id?: string | number | null;
+  centro_costo_id?: string | number | null;
+  observaciones?: string | null;
   cuotas: string | number;
   cuotas_pendientes: string | number;
   cuota_pendiente_id: string | number | null;
@@ -58,6 +66,10 @@ function toCuenta(row: CuentaRow): Cuenta {
     saldoMinor: String(row.saldo_minor),
     fechaEmision: row.fecha_emision,
     fechaVencimiento: row.fecha_vencimiento,
+    contraparteId: row.contraparte_id == null ? null : Number(row.contraparte_id),
+    cuentaPlanId: row.cuenta_plan_id == null ? null : Number(row.cuenta_plan_id),
+    centroCostoId: row.centro_costo_id == null ? null : Number(row.centro_costo_id),
+    observaciones: row.observaciones ?? null,
     cuotas: Number(row.cuotas),
     cuotasPendientes: Number(row.cuotas_pendientes),
     cuotaPendienteId: row.cuota_pendiente_id == null ? null : String(row.cuota_pendiente_id),
@@ -171,6 +183,26 @@ export function cancelarCuenta(
 ): Promise<{ id: string | number; estado: 'CANCELADO' }> {
   const path = tipo === 'pagar' ? '/cuentas-pagar' : '/cuentas-cobrar';
   return apiPost(`${path}/${cuentaId}/cancelar`, { motivo }, token);
+}
+
+export interface UpdateCuentaInput {
+  descripcion?: string;
+  numeroDocumento?: string | null;
+  contraparteId?: number | null;
+  cuentaPlanId?: number | null;
+  centroCostoId?: number | null;
+  observaciones?: string | null;
+  fechaVencimiento?: string;
+}
+
+export function updateCuenta(
+  tipo: 'pagar' | 'cobrar',
+  token: string,
+  cuentaId: string,
+  data: UpdateCuentaInput,
+): Promise<{ id: string | number; ok: boolean }> {
+  const path = tipo === 'pagar' ? '/cuentas-pagar' : '/cuentas-cobrar';
+  return apiPatch(`${path}/${cuentaId}`, data, token);
 }
 
 export interface Caja {

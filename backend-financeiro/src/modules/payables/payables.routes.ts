@@ -5,6 +5,7 @@ import { authenticate } from '../../middleware/auth.js';
 import { assertInstallmentsTotal } from '../../domain/installments.js';
 import { asMinorUnit, assertAllBusinessDates } from '../../domain/validation.js';
 import { assertCanCancelAccount, assertCanSettleInstallment } from '../../domain/cancellation.js';
+import { assertCanUpdateAccount } from '../../domain/account-update.js';
 import { recordAudit } from '../audit/audit.service.js';
 
 const router = Router();
@@ -137,7 +138,7 @@ router.get('/:id/detalle', authenticate, async (request, response) => {
       const cuenta = await client.query(
         `SELECT cp.id, cp.empresa_id, cp.descripcion, cp.numero_documento, cp.moneda,
                 cp.valor_total_minor::TEXT, cp.fecha_emision::TEXT, cp.fecha_vencimiento::TEXT,
-                cp.estado,
+                cp.estado, cp.contraparte_id, cp.cuenta_plan_id, cp.centro_costo_id, cp.observaciones,
                 e.razon_social AS empresa
            FROM cuentas_pagar cp
            JOIN empresas e ON e.tenant_id = cp.tenant_id AND e.id = cp.empresa_id
@@ -321,6 +322,154 @@ router.post('/:id/cancelar', authenticate, async (request, response) => {
   } catch (error) {
     response.status(400).json({
       message: error instanceof z.ZodError ? 'Datos de cancelación inválidos.' : (error as Error).message,
+    });
+  }
+});
+
+const updatePayableSchema = z.object({
+  descripcion: z.string().trim().min(1).max(200).optional(),
+  numeroDocumento: z.string().trim().max(50).nullable().optional(),
+  contraparteId: z.number().int().positive().nullable().optional(),
+  cuentaPlanId: z.number().int().positive().nullable().optional(),
+  centroCostoId: z.number().int().positive().nullable().optional(),
+  observaciones: z.string().max(10_000).nullable().optional(),
+  fechaVencimiento: date.optional(),
+});
+
+router.patch('/:id', authenticate, async (request, response) => {
+  try {
+    const cuentaId = z.coerce.number().int().positive().parse(request.params.id);
+    const body = updatePayableSchema.parse(request.body ?? {});
+    const auth = request.auth!;
+
+    const result = await withTenantContext(
+      { tenantId: auth.tenantId, userId: auth.tenantUserCode, schema: auth.schema },
+      async (client) => {
+        const cuentaRes = await client.query(
+          `SELECT id, empresa_id, descripcion, numero_documento, contraparte_id,
+                  cuenta_plan_id, centro_costo_id, observaciones, fecha_vencimiento::TEXT as fecha_vencimiento,
+                  moneda, valor_total_minor, estado
+           FROM cuentas_pagar
+           WHERE tenant_id = $1 AND id = $2
+           FOR UPDATE`,
+          [auth.tenantId, cuentaId],
+        );
+        if (!cuentaRes.rowCount) throw new Error('Cuenta no encontrada o sin acceso.');
+        const cuenta = cuentaRes.rows[0];
+
+        const activeBajas = await client.query(
+          `SELECT 1
+           FROM bajas_pagar b
+           JOIN cuotas_pagar q ON q.tenant_id = b.tenant_id AND q.id = b.cuota_id
+           WHERE b.tenant_id = $1 AND q.cuenta_pagar_id = $2
+           GROUP BY b.cuota_id
+           HAVING SUM(CASE WHEN b.tipo = 'BAJA' THEN b.valor_pagado_minor + b.descuento_minor ELSE -(b.valor_pagado_minor + b.descuento_minor) END) > 0
+           LIMIT 1`,
+          [auth.tenantId, cuentaId],
+        );
+
+        const hasDueDateChange = body.fechaVencimiento !== undefined && body.fechaVencimiento !== cuenta.fecha_vencimiento;
+
+        assertCanUpdateAccount({
+          estado: cuenta.estado,
+          hasDueDateChange,
+          activeBajasCount: activeBajas.rowCount ?? 0,
+          tipo: 'pagar',
+        });
+
+        if (body.cuentaPlanId) {
+          const plan = await client.query(
+            `SELECT id FROM cuentas_plan
+             WHERE tenant_id = $1 AND empresa_id = $2 AND id = $3 AND naturaleza = 'D'`,
+            [auth.tenantId, cuenta.empresa_id, body.cuentaPlanId],
+          );
+          if (!plan.rowCount) throw new Error('Cuenta del plan inválida o no corresponde a una cuenta de egreso.');
+        }
+
+        if (body.centroCostoId) {
+          const center = await client.query(
+            `SELECT id FROM centros_costo WHERE tenant_id = $1 AND empresa_id = $2 AND id = $3`,
+            [auth.tenantId, cuenta.empresa_id, body.centroCostoId],
+          );
+          if (!center.rowCount) throw new Error('Centro de costo no encontrado.');
+        }
+
+        if (body.contraparteId) {
+          const contact = await client.query(
+            `SELECT id FROM contrapartes WHERE tenant_id = $1 AND id = $2`,
+            [auth.tenantId, body.contraparteId],
+          );
+          if (!contact.rowCount) throw new Error('Contacto no encontrado.');
+        }
+
+        const newDescripcion = body.descripcion ?? cuenta.descripcion;
+        const newNumeroDoc = body.numeroDocumento !== undefined ? body.numeroDocumento : cuenta.numero_documento;
+        const newContraparteId = body.contraparteId !== undefined ? body.contraparteId : cuenta.contraparte_id;
+        const newCuentaPlanId = body.cuentaPlanId !== undefined ? body.cuentaPlanId : cuenta.cuenta_plan_id;
+        const newCentroCostoId = body.centroCostoId !== undefined ? body.centroCostoId : cuenta.centro_costo_id;
+        const newObservaciones = body.observaciones !== undefined ? body.observaciones : cuenta.observaciones;
+        const newFechaVenc = body.fechaVencimiento ?? cuenta.fecha_vencimiento;
+
+        await client.query(
+          `UPDATE cuentas_pagar
+           SET descripcion = $1,
+               numero_documento = $2,
+               contraparte_id = $3,
+               cuenta_plan_id = $4,
+               centro_costo_id = $5,
+               observaciones = $6,
+               fecha_vencimiento = $7
+           WHERE tenant_id = $8 AND id = $9`,
+          [newDescripcion, newNumeroDoc, newContraparteId, newCuentaPlanId, newCentroCostoId, newObservaciones, newFechaVenc, auth.tenantId, cuentaId],
+        );
+
+        if (hasDueDateChange) {
+          const cuotasCount = await client.query(
+            `SELECT COUNT(*)::int as count FROM cuotas_pagar WHERE tenant_id = $1 AND cuenta_pagar_id = $2`,
+            [auth.tenantId, cuentaId],
+          );
+          if (cuotasCount.rows[0].count === 1) {
+            await client.query(
+              `UPDATE cuotas_pagar SET fecha_vencimiento = $1 WHERE tenant_id = $2 AND cuenta_pagar_id = $3`,
+              [newFechaVenc, auth.tenantId, cuentaId],
+            );
+          }
+        }
+
+        await recordAudit(client, {
+          tenantId: auth.tenantId,
+          userCode: auth.tenantUserCode,
+          action: 'ACTUALIZAR',
+          entity: 'CUENTA_PAGAR',
+          entityId: cuentaId,
+          empresaId: cuenta.empresa_id,
+          detail: {
+            antes: {
+              descripcion: cuenta.descripcion,
+              numeroDocumento: cuenta.numero_documento,
+              cuentaPlanId: cuenta.cuenta_plan_id,
+              centroCostoId: cuenta.centro_costo_id,
+              fechaVencimiento: cuenta.fecha_vencimiento,
+            },
+            despues: {
+              descripcion: newDescripcion,
+              numeroDocumento: newNumeroDoc,
+              cuentaPlanId: newCuentaPlanId,
+              centroCostoId: newCentroCostoId,
+              fechaVencimiento: newFechaVenc,
+            },
+          },
+        });
+
+        return { id: cuentaId, ok: true };
+      },
+      auth.pool,
+    );
+
+    response.json(result);
+  } catch (error) {
+    response.status(400).json({
+      message: error instanceof z.ZodError ? 'Datos de actualización inválidos.' : (error as Error).message,
     });
   }
 });

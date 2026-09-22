@@ -49,6 +49,9 @@ export const apiPost = <T,>(path: string, body: unknown, token?: string | null) 
 export const apiPut = <T,>(path: string, body: unknown, token?: string | null) =>
   request<T>(path, { method: 'PUT', body: JSON.stringify(body) }, token);
 
+export const apiPatch = <T,>(path: string, body: unknown, token?: string | null) =>
+  request<T>(path, { method: 'PATCH', body: JSON.stringify(body) }, token);
+
 export async function apiDownload(path: string, filename: string, token?: string | null): Promise<void> {
   let response: Response;
   try {

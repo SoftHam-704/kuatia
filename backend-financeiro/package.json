@@ -10,7 +10,8 @@
     "test": "vitest run",
     "migrate:public": "tsx src/scripts/migrate.ts public",
     "migrate:tenant": "tsx src/scripts/migrate.ts tenant",
-    "master:migrate": "tsx src/scripts/migrate-master.ts"
+    "master:migrate": "tsx src/scripts/migrate-master.ts",
+    "seed:cenario": "tsx src/scripts/seed-cenario-real.ts"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

@@ -58,6 +58,7 @@ export const PT_BR: Record<string, string> = {
 
   /* --- Cockpit (janelas) --------------------------------------------------- */
   '"{title}" tiene cambios sin guardar. ¿Cerrar igual?': '"{title}" tem alterações não salvas. Fechar mesmo assim?',
+  'Hay cambios sin guardar. ¿Cerrar igual?': 'Há alterações não salvas. Fechar mesmo assim?',
   'sin guardar': 'não salvo',
   'Minimizar': 'Minimizar',
   'Maximizar': 'Maximizar',
@@ -304,6 +305,12 @@ export const PT_BR: Record<string, string> = {
   'El vencimiento no puede ser anterior a la emisión.': 'O vencimento não pode ser anterior à emissão.',
   'No se pudo guardar la cuenta.': 'Não foi possível salvar a conta.',
   'Guardar cuenta': 'Salvar conta',
+
+  /* --- CuentaEditModal ----------------------------------------------------------- */
+  'Editar cuenta': 'Editar conta',
+  'Guardar cambios': 'Salvar alterações',
+  'No se pudo actualizar la cuenta.': 'Não foi possível atualizar a conta.',
+  'Observaciones': 'Observações',
 
   /* --- CuentaDetail ---------------------------------------------------------------- */
   'Detalle de cuenta': 'Detalhe da conta',

@@ -17,6 +17,7 @@ import {
   createInitialWorkspace, geometriaNaArea, JANELA_FIXA, workspaceReducer,
   type KuatiaWindow,
 } from './workspace';
+import { WorkspaceWindowProvider } from './WorkspaceContext';
 import { useI18n } from '../i18n/useI18n';
 
 /**
@@ -117,6 +118,18 @@ export function Cockpit({
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [workspace.windows]);
+
+  /* Proteção contra fechamento acidental da aba/recarregamento quando há janelas com alterações não salvas */
+  const hasDirtyWindows = workspace.windows.some((w) => w.dirty);
+  useEffect(() => {
+    if (!hasDirtyWindows) return;
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasDirtyWindows]);
 
   /* Arrastar e redimensionar com Pointer Events + captura: o ponteiro continua
      entregando o movimento mesmo se sair da janela, o que `mousemove` no
@@ -222,7 +235,15 @@ export function Cockpit({
                 </span>
               </header>
 
-              <div className="ds-window__body">{conteudo(janela.id)}</div>
+              <div className="ds-window__body">
+                <WorkspaceWindowProvider
+                  windowId={janela.id}
+                  isDirty={janela.dirty}
+                  onFlag={(id, flags) => dispatch({ type: 'flag', id, ...flags })}
+                >
+                  {conteudo(janela.id)}
+                </WorkspaceWindowProvider>
+              </div>
 
               {janela.mode === 'normal' && (
                 <button

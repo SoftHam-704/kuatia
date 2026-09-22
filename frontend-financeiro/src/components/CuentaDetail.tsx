@@ -5,6 +5,7 @@ import { Modal } from './Modal';
 import { ApiError } from '../lib/api';
 import { cancelarCuenta, fetchDetalleCuenta, revertirBaja } from '../lib/operations';
 import type { Cuenta, CuentaDetalle, CuotaDetalle } from '../lib/operations';
+import { CuentaEditModal } from './CuentaEditModal';
 import { useI18n } from '../i18n/useI18n';
 import { t as tMsg } from '../i18n/translate';
 
@@ -28,6 +29,7 @@ export function CuentaDetail({
   const [error, setError] = useState('');
   const [reverting, setReverting] = useState<string | null>(null);
   const [canceling, setCanceling] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   const load = useCallback(async () => {
     setError('');
@@ -226,6 +228,17 @@ export function CuentaDetail({
 
         <footer className="ds-modal__footer" style={{ display: 'flex', justifyContent: 'space-between' }}>
           <div>
+            {!isCancelled && (
+              <button
+                type="button"
+                className="ds-btn ds-btn--secondary"
+                style={{ marginRight: '0.5rem' }}
+                disabled={canceling || reverting !== null}
+                onClick={() => setEditing(true)}
+              >
+                {t('Editar')}
+              </button>
+            )}
             {canCancel && (
               <button
                 type="button"
@@ -242,6 +255,19 @@ export function CuentaDetail({
             {t('Cerrar')}
           </button>
         </footer>
+
+        {editing && detalle && (
+          <CuentaEditModal
+            tipo={tipo}
+            token={token}
+            cuenta={detalle.cuenta}
+            onDone={() => {
+              void load();
+              onChanged();
+            }}
+            onClose={() => setEditing(false)}
+          />
+        )}
       </div>
     </Modal>
   );
