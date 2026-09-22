@@ -33,7 +33,7 @@
 
 ---
 
-## Resolvidas em 2026-09-22 (Fases 9, 10 e 11 — Retomada, Projeção, Cancelamento e Planilhas)
+## Resolvidas em 2026-09-22 (Fases 9, 10, 11 e 12 — Retomada, Projeção, Cancelamento, Planilhas e DRE)
 
 | ID | Como foi resolvida |
 |---|---|
@@ -41,6 +41,7 @@
 | **B-01 (Fronteira §7)** | **Projeção de Saldo Acumulado no Fluxo de Caixa (Fase 9):** Resolvida a lacuna funcional de liquidez. O backend calcula saldo inicial das caixas/bancos antes de `desde` e projeta o saldo acumulado corrido dia a dia por moeda (PYG/USD/BRL separados). Front-end e exportações (Excel/PDF) atualizados com cartões de saldo inicial e coluna de saldo acumulado. Relatório em `outputs/fases/F9-flujo-caja-saldo-acumulado.md`. |
 | **B-02 (Fronteira §7)** | **Cancelamento de Contas com Auditoria (Fase 10):** Resolvida a lacuna funcional de cancelamento de contas a pagar e receber. Criado domínio puro de regras (`cancellation.ts`), endpoints `POST /:id/cancelar` em `payables.routes.ts` e `receivables.routes.ts`, gravação de auditoria em `auditoria_eventos`, trava de segurança impedindo cancelamento de contas com baixas ativas e impedindo baixas em contas canceladas. Frontend atualizado com badge `.ds-badge--cancelado`, filtro por canceladas e botão de cancelar conta com prompt de motivo. Corpus atualizado em `contexto.md` (§7) e manuais 03 e 04. Relatório em `outputs/fases/F10-cancelamento-de-contas.md`. |
 | **B-03 (Fronteira §7)** | **Carga Inicial em Lote por Planilha CSV / Excel (Fase 11):** Resolvida a lacuna funcional de implantação em lote de clientes/fornecedores e contas abertas com saldos legados. Suporte a CSV e pastas de trabalho Excel (.xlsx) via backend `ExcelJS`, endpoint de download de modelos com dados de exemplo (`GET /planilla/plantilla`), conferência prévia linha a linha no Cockpit MDI com badges de erro/válida sem frear linhas boas, proteção idempotente por hash de arquivo e auditoria formal em `auditoria_eventos`. Corpus atualizado em `contexto.md` (§7) e manual 07. Relatório em `outputs/fases/F11-importacao-planilhas.md`. |
+| **B-04 (Fronteira §7)** | **Resultado Gerencial com Movimentos de Caixa (Fase 12):** Resolvida a lacuna funcional onde despesas e receitas diretas de caixa não apareciam no DRE. Backend integra movimentos manuais (`movimientos_caja` com `origen = 'MA'` e `cuenta_plan_id IS NOT NULL`) ponderados pela natureza da conta contábil (`D` vs `R`), calculando totalizadores isolados por moeda (`PYG`, `USD`, `BRL`). Cockpit MDI enriquecido com cards de KPI (Ingresos, Egresos, Resultado neto) por moeda ativa. Exportações (Excel/PDF) e Corpus alinhados. Relatório em `outputs/fases/F12-resultado-gerencial-com-caixa.md`. |
 | **P-01 (Deprecation)** | **Concorrência de Query no PoolClient:** Resolvido o `DeprecationWarning: Calling client.query() when the client is already executing a query`. Chamadas concorrentes `Promise.all` sobre o mesmo cliente no tenant context foram convertidas para sequenciais. |
 
 ---

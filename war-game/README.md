@@ -7,20 +7,21 @@
 
 | | |
 |---|---|
-| **Fases fechadas** | F0, F1, F2, F3, F5, F6, F7, F8, F9, F10, F11 ✅ · F4 ⚠️ parcial (TLS pendente) |
-| **Fase atual** | — F11 concluída (Carga inicial em lote por planilha CSV / Excel) |
-| **No Corpus** | `products/kuatia/contexto.md` + `manual/` com **9 capítulos** (atualizados em F11 com importação de planilhas e remoção de B3 em §7). `check-corpus.js` sem erros. |
-| **Versão do plano** | `v1` (2026-08-11) · F9/F10/F11 (2026-09-22) |
+| **Fases fechadas** | F0, F1, F2, F3, F5, F6, F7, F8, F9, F10, F11, F12 ✅ · F4 ⚠️ parcial (TLS pendente) |
+| **Fase atual** | — F12 concluída (Resultado gerencial com movimentos de caixa e KPIs por moeda) |
+| **No Corpus** | `products/kuatia/contexto.md` + `manual/` com **9 capítulos** (atualizados em F12 com DRE integrando caixa e remoção de B-04 em §7). `check-corpus.js` sem erros. |
+| **Versão do plano** | `v1` (2026-08-11) · F9/F10/F11/F12 (2026-09-22) |
 | **RLS** | ✅ Ativo desde 2026-08-11. O app conecta como `kuatia_adm` (`NOSUPERUSER NOBYPASSRLS`); teste de vazamento com tenant inexistente devolve 0 linhas. |
 | **Schema** | ✅ Dados do tenant em `pinheirao`; `public` só com o comum. Ver [`outputs/fases/F6-schema-do-tenant.md`](outputs/fases/F6-schema-do-tenant.md). |
 | **Provisionamento** | ✅ `npm run migrate:tenant -- <schema>`. Provado criando um tenant do zero e comparando objeto a objeto com o Pinheirão. Ver [`F7`](outputs/fases/F7-provisionamento-de-tenant.md). |
 | **Fluxo de Caixa** | ✅ Projeção com saldo inicial e acumulado por moeda. Ver [`F9`](outputs/fases/F9-flujo-caja-saldo-acumulado.md). |
 | **Cancelamento** | ✅ Cancelamento com trava de baixas ativas e auditoria. Ver [`F10`](outputs/fases/F10-cancelamento-de-contas.md). |
 | **Planilhas** | ✅ Carga inicial em lote por CSV e Excel (.xlsx) com conferência e download de modelos. Ver [`F11`](outputs/fases/F11-importacao-planilhas.md). |
+| **Resultado Gerencial** | ✅ DRE unindo contas e lançamentos manuais de caixa com KPIs e isolamento de moedas. Ver [`F12`](outputs/fases/F12-resultado-gerencial-com-caixa.md). |
 | **Aberto** | L-05 (pools × Pgpool) · L-06 (nó fixo em vez do Pgpool) · D-09 (TLS) · D-12 (`bloqueio_ativo` no master) |
 | **Repositório** | Git ativo e pareado: `https://github.com/SoftHam-704/kuatia.git` (`main`) |
 
-Relatório das fases executadas: [`outputs/fases/F0-F4-relatorio.md`](outputs/fases/F0-F4-relatorio.md) · [`outputs/fases/F9-flujo-caja-saldo-acumulado.md`](outputs/fases/F9-flujo-caja-saldo-acumulado.md) · [`outputs/fases/F10-cancelamento-de-contas.md`](outputs/fases/F10-cancelamento-de-contas.md) · [`outputs/fases/F11-importacao-planilhas.md`](outputs/fases/F11-importacao-planilhas.md)
+Relatório das fases executadas: [`outputs/fases/F0-F4-relatorio.md`](outputs/fases/F0-F4-relatorio.md) · [`outputs/fases/F9-flujo-caja-saldo-acumulado.md`](outputs/fases/F9-flujo-caja-saldo-acumulado.md) · [`outputs/fases/F10-cancelamento-de-contas.md`](outputs/fases/F10-cancelamento-de-contas.md) · [`outputs/fases/F11-importacao-planilhas.md`](outputs/fases/F11-importacao-planilhas.md) · [`outputs/fases/F12-resultado-gerencial-com-caixa.md`](outputs/fases/F12-resultado-gerencial-com-caixa.md)
 
 ## Onde paramos — 2026-08-11, fim do dia
 

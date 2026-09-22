@@ -5,6 +5,250 @@ import { formatDate } from '../design-system/format';
 import { ApiError, apiDownload, apiGet } from '../lib/api';
 import { useI18n } from '../i18n/useI18n';
 import { t as tMsg } from '../i18n/translate';
-type Row = { codigo: string; descripcion: string; naturaleza: 'R' | 'D'; moneda: CurrencyCode; valor_minor: string; documentos: number };
-const today = new Date().toISOString().slice(0, 10); const monthStart = () => `${today.slice(0, 7)}-01`;
-export function ResultadosScreen({ token, empresaId }: { token: string; empresaId: number }) { const { t } = useI18n(); const [desde, setDesde] = useState(monthStart); const [hasta, setHasta] = useState(today); const [rows, setRows] = useState<Row[]>([]); const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading'); const [error, setError] = useState(''); const load = useCallback(async () => { setStatus('loading'); try { const body = await apiGet<{ data: Row[]; emptyReason: string }>(`/reportes/resultados?empresaId=${empresaId}&desde=${desde}&hasta=${hasta}`, token); setRows(body.data); setStatus('ready'); } catch (failure) { setError(failure instanceof ApiError ? failure.message : tMsg('No se pudo generar el reporte.')); setStatus('error'); } }, [token, empresaId, desde, hasta]); useEffect(() => { void load(); }, [load]); async function exportar(formato: 'xlsx' | 'pdf') { try { await apiDownload(`/exportaciones/reportes?tipo=RESULTADOS&empresaId=${empresaId}&desde=${desde}&hasta=${hasta}&formato=${formato}`, `kuatia-resultados-${new Date().toISOString().slice(0, 10)}.${formato}`, token); } catch (failure) { setError(failure instanceof ApiError ? failure.message : tMsg('No se pudo preparar el archivo.')); } } return <><header className="ds-page-header"><div className="ds-page-header__text"><h1 className="ds-title">{t('Resultados gerenciales')}</h1><p className="ds-secondary">{t('Ingresos y egresos por cuenta del plan; no sustituye la contabilidad formal.')}</p></div><div className="ds-page-header__actions"><button className="ds-btn ds-btn--secondary" onClick={() => void exportar('xlsx')} disabled={status !== 'ready'}>Excel</button><button className="ds-btn ds-btn--secondary" onClick={() => void exportar('pdf')} disabled={status !== 'ready'}>PDF</button><button className="ds-btn ds-btn--secondary" onClick={() => void load()} disabled={status === 'loading'}>{status === 'loading' ? t('Actualizando…') : t('Actualizar')}</button></div></header><section className="ds-card"><div className="ds-card__body"><div className="ds-filters"><div className="ds-field"><label className="ds-label">{t('Desde')}</label><input className="ds-input" type="date" value={desde} onChange={(event) => setDesde(event.target.value)} /></div><div className="ds-field"><label className="ds-label">{t('Hasta')}</label><input className="ds-input" type="date" value={hasta} onChange={(event) => setHasta(event.target.value)} /></div></div></div>{status === 'error' && <div className="ds-card__body"><div className="ds-alert ds-alert--danger"><div className="ds-alert__body"><p>{error}</p></div></div></div>}{status === 'loading' ? <div className="ds-card__body ds-stack-2">{[1, 2, 3].map((item) => <div className="ds-skeleton" key={item} style={{ height: '2rem' }} />)}</div> : rows.length === 0 ? <div className="ds-empty"><p className="ds-empty__title">{t('No hay resultados clasificados')}</p><p className="ds-empty__text">{t('Clasificá las cuentas por pagar o cobrar con una cuenta del plan para ver el DRE entre {desde} y {hasta}.', { desde: formatDate(desde), hasta: formatDate(hasta) })}</p></div> : <div className="ds-table-wrap" style={{ border: 0 }}><table className="ds-table ds-table--cards"><thead><tr><th>{t('Cuenta')}</th><th>{t('Tipo')}</th><th>{t('Moneda')}</th><th className="is-num">{t('Importe')}</th><th className="is-num">{t('Documentos')}</th></tr></thead><tbody>{rows.map((row) => <tr key={`${row.codigo}-${row.moneda}`}><td data-label={t('Cuenta')} className="is-strong">{row.codigo} · {row.descripcion}</td><td data-label={t('Tipo')}><span className={`ds-badge ds-badge--${row.naturaleza === 'R' ? 'cobrado' : 'vencido'}`}>{row.naturaleza === 'R' ? t('Ingreso') : t('Egreso')}</span></td><td data-label={t('Moneda')}><CurrencyChip code={row.moneda} /></td><td className="is-num is-strong" data-label={t('Importe')}><Money minor={row.valor_minor} currency={row.moneda} /></td><td className="is-num" data-label={t('Documentos')}>{row.documentos}</td></tr>)}</tbody></table></div>}</section></>; }
+
+type Row = {
+  codigo: string;
+  descripcion: string;
+  naturaleza: 'R' | 'D';
+  moneda: CurrencyCode;
+  valor_minor: string;
+  documentos: number;
+};
+
+type TotalesPorMoneda = {
+  moneda: CurrencyCode;
+  ingresos_minor: string;
+  egresos_minor: string;
+  neto_minor: string;
+};
+
+type ResultadosResponse = {
+  data: Row[];
+  totalesPorMoneda?: TotalesPorMoneda[];
+  emptyReason: string;
+};
+
+const today = new Date().toISOString().slice(0, 10);
+const monthStart = () => `${today.slice(0, 7)}-01`;
+
+export function ResultadosScreen({ token, empresaId }: { token: string; empresaId: number }) {
+  const { t } = useI18n();
+  const [desde, setDesde] = useState(monthStart);
+  const [hasta, setHasta] = useState(today);
+  const [rows, setRows] = useState<Row[]>([]);
+  const [totales, setTotales] = useState<TotalesPorMoneda[]>([]);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [error, setError] = useState('');
+
+  const load = useCallback(async () => {
+    setStatus('loading');
+    setError('');
+    try {
+      const body = await apiGet<ResultadosResponse>(
+        `/reportes/resultados?empresaId=${empresaId}&desde=${desde}&hasta=${hasta}`,
+        token,
+      );
+      setRows(body.data);
+      setTotales(body.totalesPorMoneda ?? []);
+      setStatus('ready');
+    } catch (failure) {
+      setError(failure instanceof ApiError ? failure.message : tMsg('No se pudo generar el reporte.'));
+      setStatus('error');
+    }
+  }, [token, empresaId, desde, hasta]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  async function exportar(formato: 'xlsx' | 'pdf') {
+    try {
+      await apiDownload(
+        `/exportaciones/reportes?tipo=RESULTADOS&empresaId=${empresaId}&desde=${desde}&hasta=${hasta}&formato=${formato}`,
+        `kuatia-resultados-${new Date().toISOString().slice(0, 10)}.${formato}`,
+        token,
+      );
+    } catch (failure) {
+      setError(failure instanceof ApiError ? failure.message : tMsg('No se pudo preparar el archivo.'));
+    }
+  }
+
+  return (
+    <>
+      <header className="ds-page-header">
+        <div className="ds-page-header__text">
+          <h1 className="ds-title">{t('Resultados gerenciales')}</h1>
+          <p className="ds-secondary">
+            {t('Ingresos y egresos por cuenta del plan; no sustituye la contabilidad formal.')}
+          </p>
+        </div>
+        <div className="ds-page-header__actions">
+          <button
+            type="button"
+            className="ds-btn ds-btn--secondary"
+            onClick={() => void exportar('xlsx')}
+            disabled={status !== 'ready'}
+          >
+            Excel
+          </button>
+          <button
+            type="button"
+            className="ds-btn ds-btn--secondary"
+            onClick={() => void exportar('pdf')}
+            disabled={status !== 'ready'}
+          >
+            PDF
+          </button>
+          <button
+            type="button"
+            className="ds-btn ds-btn--secondary"
+            onClick={() => void load()}
+            disabled={status === 'loading'}
+          >
+            {status === 'loading' ? t('Actualizando…') : t('Actualizar')}
+          </button>
+        </div>
+      </header>
+
+      <section className="ds-card">
+        <div className="ds-card__body">
+          <div className="ds-filters">
+            <div className="ds-field">
+              <label className="ds-label">{t('Desde')}</label>
+              <input
+                className="ds-input"
+                type="date"
+                value={desde}
+                onChange={(event) => setDesde(event.target.value)}
+              />
+            </div>
+            <div className="ds-field">
+              <label className="ds-label">{t('Hasta')}</label>
+              <input
+                className="ds-input"
+                type="date"
+                value={hasta}
+                onChange={(event) => setHasta(event.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+
+        {status === 'error' && (
+          <div className="ds-card__body">
+            <div className="ds-alert ds-alert--danger">
+              <div className="ds-alert__body">
+                <p>{error}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {status === 'loading' ? (
+          <div className="ds-card__body ds-stack-2" aria-busy="true">
+            {[1, 2, 3].map((item) => (
+              <div className="ds-skeleton" key={item} style={{ height: '2rem' }} />
+            ))}
+          </div>
+        ) : rows.length === 0 ? (
+          <div className="ds-empty">
+            <p className="ds-empty__title">{t('No hay resultados clasificados')}</p>
+            <p className="ds-empty__text">
+              {t(
+                'Clasificá las cuentas por pagar o cobrar con una cuenta del plan para ver el DRE entre {desde} y {hasta}.',
+                { desde: formatDate(desde), hasta: formatDate(hasta) },
+              )}
+            </p>
+          </div>
+        ) : (
+          <>
+            {totales.length > 0 && (
+              <div className="ds-card__body ds-stack-2">
+                {totales.map((tot) => {
+                  const neto = BigInt(tot.neto_minor);
+                  return (
+                    <div key={tot.moneda} className="ds-stack">
+                      {totales.length > 1 && (
+                        <div className="ds-row ds-row--tight">
+                          <span className="ds-strong">{t('Moneda')}:</span>
+                          <CurrencyChip code={tot.moneda} />
+                        </div>
+                      )}
+                      <div className="ds-kpi-grid">
+                        <article className="ds-kpi ds-kpi--positive">
+                          <p className="ds-kpi__label">
+                            {t('Ingresos')} <CurrencyChip code={tot.moneda} />
+                          </p>
+                          <p className="ds-kpi__value">
+                            <Money minor={tot.ingresos_minor} currency={tot.moneda} />
+                          </p>
+                        </article>
+                        <article className="ds-kpi ds-kpi--negative">
+                          <p className="ds-kpi__label">
+                            {t('Egresos')} <CurrencyChip code={tot.moneda} />
+                          </p>
+                          <p className="ds-kpi__value">
+                            <Money minor={tot.egresos_minor} currency={tot.moneda} />
+                          </p>
+                        </article>
+                        <article
+                          className={`ds-kpi ${neto > 0n ? 'ds-kpi--positive' : neto < 0n ? 'ds-kpi--negative' : 'ds-kpi--accent'}`}
+                        >
+                          <p className="ds-kpi__label">
+                            {t('Resultado neto')} <CurrencyChip code={tot.moneda} />
+                          </p>
+                          <p className="ds-kpi__value">
+                            <Money minor={tot.neto_minor} currency={tot.moneda} tone="signed" />
+                          </p>
+                        </article>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            <div className="ds-table-wrap" style={{ border: 0 }}>
+              <table className="ds-table ds-table--cards">
+                <thead>
+                  <tr>
+                    <th>{t('Cuenta')}</th>
+                    <th>{t('Tipo')}</th>
+                    <th>{t('Moneda')}</th>
+                    <th className="is-num">{t('Importe')}</th>
+                    <th className="is-num">{t('Documentos')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((row) => (
+                    <tr key={`${row.codigo}-${row.moneda}`}>
+                      <td data-label={t('Cuenta')} className="is-strong">
+                        {row.codigo} · {row.descripcion}
+                      </td>
+                      <td data-label={t('Tipo')}>
+                        <span
+                          className={`ds-badge ds-badge--${row.naturaleza === 'R' ? 'cobrado' : 'vencido'}`}
+                        >
+                          {row.naturaleza === 'R' ? t('Ingreso') : t('Egreso')}
+                        </span>
+                      </td>
+                      <td data-label={t('Moneda')}>
+                        <CurrencyChip code={row.moneda} />
+                      </td>
+                      <td className="is-num is-strong" data-label={t('Importe')}>
+                        <Money minor={row.valor_minor} currency={row.moneda} />
+                      </td>
+                      <td className="is-num" data-label={t('Documentos')}>
+                        {row.documentos}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+      </section>
+    </>
+  );
+}

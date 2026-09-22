@@ -445,6 +445,9 @@ export const PT_BR: Record<string, string> = {
   'Resultados gerenciales': 'Resultados gerenciais',
   'Ingresos y egresos por cuenta del plan; no sustituye la contabilidad formal.':
     'Receitas e despesas por conta do plano; não substitui a contabilidade formal.',
+  'Ingresos': 'Receitas',
+  'Egresos': 'Despesas',
+  'Resultado neto': 'Resultado líquido',
   'No se pudo generar el reporte.': 'Não foi possível gerar o relatório.',
   'No hay resultados clasificados': 'Não há resultados classificados',
   'Clasificá las cuentas por pagar o cobrar con una cuenta del plan para ver el DRE entre {desde} y {hasta}.':

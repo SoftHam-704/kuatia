@@ -4,6 +4,7 @@ import { withTenantContext } from '../../config/database.js';
 import { authenticate, requireTenantAdmin } from '../../middleware/auth.js';
 import { assertAllBusinessDates } from '../../domain/validation.js';
 import { projectCashflow, type CashflowEventInput, type CashflowInitialBalance } from '../../domain/cashflow.js';
+import { calculateIncomeStatementTotals } from '../../domain/income-statement.js';
 
 const router = Router();
 const companyQuery = z.object({ empresaId: z.coerce.number().int().positive() });
@@ -200,9 +201,23 @@ router.get('/resultados', authenticate, async (request, response) => {
         await client.query(
           `SELECT cp.codigo,cp.descripcion,cp.naturaleza,origen.moneda,SUM(origen.valor_minor)::TEXT AS valor_minor,COUNT(*)::INT AS documentos
            FROM (
-             SELECT cuenta_plan_id,moneda,valor_total_minor AS valor_minor FROM cuentas_pagar WHERE tenant_id=$1 AND empresa_id=$2 AND fecha_emision BETWEEN $3 AND $4 AND estado<>'CANCELADO'
+             SELECT cuenta_plan_id,moneda,valor_total_minor AS valor_minor
+             FROM cuentas_pagar
+             WHERE tenant_id=$1 AND empresa_id=$2 AND fecha_emision BETWEEN $3 AND $4 AND estado<>'CANCELADO' AND cuenta_plan_id IS NOT NULL
              UNION ALL
-             SELECT cuenta_plan_id,moneda,valor_total_minor FROM cuentas_cobrar WHERE tenant_id=$1 AND empresa_id=$2 AND fecha_emision BETWEEN $3 AND $4 AND estado<>'CANCELADO'
+             SELECT cuenta_plan_id,moneda,valor_total_minor
+             FROM cuentas_cobrar
+             WHERE tenant_id=$1 AND empresa_id=$2 AND fecha_emision BETWEEN $3 AND $4 AND estado<>'CANCELADO' AND cuenta_plan_id IS NOT NULL
+             UNION ALL
+             SELECT m.cuenta_plan_id,m.moneda,
+                    CASE
+                      WHEN (cp_sub.naturaleza = 'D' AND m.tipo = 'D') OR (cp_sub.naturaleza = 'R' AND m.tipo = 'C') THEN m.valor_minor
+                      ELSE -m.valor_minor
+                    END AS valor_minor
+             FROM movimientos_caja m
+             JOIN cuentas_plan cp_sub ON cp_sub.tenant_id = m.tenant_id AND cp_sub.id = m.cuenta_plan_id
+             WHERE m.tenant_id=$1 AND m.empresa_id=$2 AND m.fecha BETWEEN $3 AND $4
+               AND m.origen='MA' AND m.cuenta_plan_id IS NOT NULL
            ) origen JOIN cuentas_plan cp ON cp.tenant_id=$1 AND cp.id=origen.cuenta_plan_id
            GROUP BY cp.codigo,cp.descripcion,cp.naturaleza,origen.moneda ORDER BY origen.moneda,cp.codigo`,
           [auth.tenantId, empresaId, desde, hasta],
@@ -210,7 +225,12 @@ router.get('/resultados', authenticate, async (request, response) => {
       ).rows,
       auth.pool,
     );
-    response.json({ data, emptyReason: data.length ? '' : 'No hay cuentas clasificadas en el período seleccionado.' });
+    const totalesPorMoneda = calculateIncomeStatementTotals(data);
+    response.json({
+      data,
+      totalesPorMoneda,
+      emptyReason: data.length ? '' : 'No hay cuentas clasificadas en el período seleccionado.',
+    });
   } catch (error) {
     response.status(400).json({ message: error instanceof z.ZodError ? 'Parámetros inválidos.' : (error as Error).message });
   }

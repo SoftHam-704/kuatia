@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { projectCashflow } from '../src/domain/cashflow.js';
+import { calculateIncomeStatementTotals } from '../src/domain/income-statement.js';
 
 describe('cashflow projection', () => {
   it('projeta saldo acumulado isolando moedas diferentes', () => {
@@ -70,3 +71,35 @@ describe('cashflow projection', () => {
     expect(result.rows[0].neto_minor).toBe('-3000');
   });
 });
+
+describe('income statement totals (DRE)', () => {
+  it('consolida receitas e despesas por moeda calculando resultado líquido', () => {
+    const rows = [
+      { naturaleza: 'R' as const, moneda: 'PYG' as const, valor_minor: '15000000' },
+      { naturaleza: 'D' as const, moneda: 'PYG' as const, valor_minor: '9000000' },
+      { naturaleza: 'D' as const, moneda: 'PYG' as const, valor_minor: '2000000' },
+      { naturaleza: 'R' as const, moneda: 'USD' as const, valor_minor: '500000' }, // $5,000.00
+      { naturaleza: 'D' as const, moneda: 'USD' as const, valor_minor: '650000' }, // $6,500.00 (resultado negativo)
+    ];
+
+    const totals = calculateIncomeStatementTotals(rows);
+    expect(totals).toHaveLength(2);
+
+    // PYG: 15.000.000 - 11.000.000 = +4.000.000
+    expect(totals[0]).toEqual({
+      moneda: 'PYG',
+      ingresos_minor: '15000000',
+      egresos_minor: '11000000',
+      neto_minor: '4000000',
+    });
+
+    // USD: 500.000 - 650.000 = -150.000
+    expect(totals[1]).toEqual({
+      moneda: 'USD',
+      ingresos_minor: '500000',
+      egresos_minor: '650000',
+      neto_minor: '-150000',
+    });
+  });
+});
+

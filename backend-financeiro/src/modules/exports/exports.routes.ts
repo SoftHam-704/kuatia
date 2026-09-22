@@ -262,8 +262,31 @@ router.get('/reportes', authenticate, async (request, response) => {
       }
       if (input.tipo === 'RESULTADOS') {
         const company = await client.query('SELECT razon_social FROM empresas WHERE tenant_id=$1 AND id=$2 AND activa=TRUE', [auth.tenantId, input.empresaId]); if (!company.rowCount) throw new Error('Empresa no encontrada o sin acceso.');
-        const data = await client.query(`SELECT cp.codigo,cp.descripcion,cp.naturaleza,origen.moneda,SUM(origen.valor_minor)::TEXT AS valor_minor,COUNT(*)::INT AS documentos FROM (SELECT cuenta_plan_id,moneda,valor_total_minor AS valor_minor FROM cuentas_pagar WHERE tenant_id=$1 AND empresa_id=$2 AND fecha_emision BETWEEN $3 AND $4 AND estado<>'CANCELADO' UNION ALL SELECT cuenta_plan_id,moneda,valor_total_minor FROM cuentas_cobrar WHERE tenant_id=$1 AND empresa_id=$2 AND fecha_emision BETWEEN $3 AND $4 AND estado<>'CANCELADO') origen JOIN cuentas_plan cp ON cp.tenant_id=$1 AND cp.id=origen.cuenta_plan_id GROUP BY cp.codigo,cp.descripcion,cp.naturaleza,origen.moneda ORDER BY origen.moneda,cp.codigo`, [auth.tenantId, input.empresaId, input.desde, input.hasta]);
-        return { title: 'Resultados gerenciales', subtitle: `${company.rows[0].razon_social} · ${formatDate(input.desde!)} al ${formatDate(input.hasta!)} · no sustituye contabilidad formal`, headers: ['Código', 'Cuenta', 'Tipo', 'Moneda', 'Importe', 'Documentos'], rows: data.rows.map((row) => [row.codigo, row.descripcion, row.naturaleza === 'R' ? 'Ingreso' : 'Egreso', row.moneda, formatMoney(row.valor_minor, row.moneda), String(row.documentos)]) };
+        const data = await client.query(
+          `SELECT cp.codigo,cp.descripcion,cp.naturaleza,origen.moneda,SUM(origen.valor_minor)::TEXT AS valor_minor,COUNT(*)::INT AS documentos
+           FROM (
+             SELECT cuenta_plan_id,moneda,valor_total_minor AS valor_minor
+             FROM cuentas_pagar
+             WHERE tenant_id=$1 AND empresa_id=$2 AND fecha_emision BETWEEN $3 AND $4 AND estado<>'CANCELADO' AND cuenta_plan_id IS NOT NULL
+             UNION ALL
+             SELECT cuenta_plan_id,moneda,valor_total_minor
+             FROM cuentas_cobrar
+             WHERE tenant_id=$1 AND empresa_id=$2 AND fecha_emision BETWEEN $3 AND $4 AND estado<>'CANCELADO' AND cuenta_plan_id IS NOT NULL
+             UNION ALL
+             SELECT m.cuenta_plan_id,m.moneda,
+                    CASE
+                      WHEN (cp_sub.naturaleza = 'D' AND m.tipo = 'D') OR (cp_sub.naturaleza = 'R' AND m.tipo = 'C') THEN m.valor_minor
+                      ELSE -m.valor_minor
+                    END AS valor_minor
+             FROM movimientos_caja m
+             JOIN cuentas_plan cp_sub ON cp_sub.tenant_id = m.tenant_id AND cp_sub.id = m.cuenta_plan_id
+             WHERE m.tenant_id=$1 AND m.empresa_id=$2 AND m.fecha BETWEEN $3 AND $4
+               AND m.origen='MA' AND m.cuenta_plan_id IS NOT NULL
+           ) origen JOIN cuentas_plan cp ON cp.tenant_id=$1 AND cp.id=origen.cuenta_plan_id
+           GROUP BY cp.codigo,cp.descripcion,cp.naturaleza,origen.moneda ORDER BY origen.moneda,cp.codigo`,
+          [auth.tenantId, input.empresaId, input.desde, input.hasta],
+        );
+        return { title: 'Resultados gerenciales', subtitle: `${company.rows[0].razon_social} · ${formatDate(input.desde!)} al ${formatDate(input.hasta!)} · no sustituye contabilidade formal`, headers: ['Código', 'Cuenta', 'Tipo', 'Moneda', 'Importe', 'Documentos'], rows: data.rows.map((row) => [row.codigo, row.descripcion, row.naturaleza === 'R' ? 'Ingreso' : 'Egreso', row.moneda, formatMoney(row.valor_minor, row.moneda), String(row.documentos)]) };
       }
       const companies = await client.query('SELECT id,razon_social FROM empresas WHERE tenant_id=$1 AND activa=TRUE ORDER BY razon_social', [auth.tenantId]); const rows: string[][] = [];
       for (const company of companies.rows) { const dashboard = await companyDashboard(client, auth.tenantId, Number(company.id)); const add = (indicator: string, list: any[], value: (row: any) => string) => list.forEach((row) => rows.push([company.razon_social, indicator, row.moneda, formatMoney(value(row), row.moneda)])); add('Saldo en cajas', dashboard.saldosCaja, (row) => row.saldo_minor); add('Por pagar: vencido + 30 días', dashboard.cuentasPagar, (row) => (BigInt(row.vencidos_minor) + BigInt(row.proximos_30_minor)).toString()); add('Por cobrar: vencido + 30 días', dashboard.cuentasCobrar, (row) => (BigInt(row.vencidos_minor) + BigInt(row.proximos_30_minor)).toString()); add('Entradas del mes', dashboard.movimientosMes, (row) => row.entradas_minor); add('Salidas del mes', dashboard.movimientosMes, (row) => row.salidas_minor); add('Neto del mes', dashboard.movimientosMes, (row) => (BigInt(row.entradas_minor) - BigInt(row.salidas_minor)).toString()); }
