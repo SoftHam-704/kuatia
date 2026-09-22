@@ -94,7 +94,7 @@
      ------------------------------------------------------------------------ */
 
   /* Superfícies */
-  --bg-app:        #dfe7ef;
+  --bg-app:        #e2efe0;
   --bg-surface:    var(--slate-0);
   --bg-raised:     var(--slate-0);
   --bg-sunken:     #eef3f8;
@@ -103,6 +103,26 @@
   --bg-selected:   var(--blue-50);
   --bg-inverse:    var(--blue-900);
   --bg-backdrop:   rgb(12 42 69 / 0.55);
+
+  /* Tema Fintech Bento Box (Estilo Finova / Revolut) */
+  --bg-fintech-canvas:   #e2efe0;
+  --bg-fintech-canvas-subtle: #ebf5ea;
+  --bg-bento-card:       #ffffff;
+  --bg-bento-dark:       #11161f;
+  --bg-bento-dark-subtle:#1a2330;
+  --radius-bento:        24px;
+  --radius-bento-sm:     16px;
+  --radius-squircle:     14px;
+  --shadow-bento:        0 4px 20px -2px rgba(18, 42, 26, 0.05);
+  --shadow-bento-hover:  0 10px 28px -4px rgba(18, 42, 26, 0.09);
+  --shadow-bento-dark:   0 12px 32px -4px rgba(0, 0, 0, 0.35);
+
+  /* Ações Rápidas Bento (Squircles coloridos) */
+  --sq-emerald-bg: #dcfce7; --sq-emerald-fg: #15803d;
+  --sq-cyan-bg:    #e0f2fe; --sq-cyan-fg:    #0369a1;
+  --sq-amber-bg:   #fef3c7; --sq-amber-fg:   #b45309;
+  --sq-purple-bg:  #f3e8ff; --sq-purple-fg:  #7e22ce;
+  --sq-rose-bg:    #ffe4e6; --sq-rose-fg:    #be123c;
 
   /* Bordas */
   --border-subtle: #e2e8f0;

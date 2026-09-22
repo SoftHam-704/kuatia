@@ -240,6 +240,7 @@ export function Cockpit({
                   windowId={janela.id}
                   isDirty={janela.dirty}
                   onFlag={(id, flags) => dispatch({ type: 'flag', id, ...flags })}
+                  onOpenWindow={(id) => abrir(id as ModuloId)}
                 >
                   {conteudo(janela.id)}
                 </WorkspaceWindowProvider>

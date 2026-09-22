@@ -633,5 +633,24 @@ export const PT_BR: Record<string, string> = {
   '¿Seguro que querés desactivar el usuario "{nombre}"?': 'Tem certeza de que deseja desativar o usuário "{nombre}"?',
   'El usuario ya no podrá iniciar sesión en ninguna empresa del grupo.':
     'O usuário não poderá mais iniciar sessão em nenhuma empresa do grupo.',
+
+  /* --- Fintech Bento Box Dashboard (Finova Style) ------------------------------ */
+  'Operacional': 'Operacional',
+  'Comercial': 'Comercial',
+  'Administración': 'Administração',
+  'Impuestos': 'Impostos',
+  'Este mes': 'Este mês',
+  'vs mes anterior': 'vs mês anterior',
+  'Sin cuentas registradas': 'Sem contas registradas',
+  'Ver todas las cuentas': 'Ver todas as contas',
+  'Evolución mensual': 'Evolução mensal',
+  'Transacciones recientes': 'Transações recentes',
+  'Ver todas': 'Ver todas',
+  'Sin transacciones registradas': 'Sem transações registradas',
+  'Acciones rápidas': 'Ações rápidas',
+  'Distribución de gastos': 'Distribuição de despesas',
+  'Vencimientos próximos': 'Vencimentos próximos',
+  'Auditoría inmutable': 'Auditoria imutável',
+  'Multimoneda': 'Multimoeda',
 };
 
