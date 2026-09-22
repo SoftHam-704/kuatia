@@ -241,6 +241,8 @@ export const PT_BR: Record<string, string> = {
   'Vencida': 'Vencida',
   'Parcial': 'Parcial',
   'Abierta': 'Aberta',
+  'Cancelada': 'Cancelada',
+  'Canceladas': 'Canceladas',
   'No se pudo listar.': 'Não foi possível listar.',
   'Vencimientos evaluados contra el {fecha}, fecha del servidor': 'Vencimentos avaliados contra {fecha}, data do servidor',
   'Nueva cuenta': 'Nova conta',
@@ -327,6 +329,13 @@ export const PT_BR: Record<string, string> = {
   'Vigente': 'Vigente',
   'Revirtiendo…': 'Estornando…',
   'Revertir': 'Estornar',
+  'Cancelar cuenta': 'Cancelar conta',
+  'Cancelando…': 'Cancelando…',
+  'Esta cuenta fue cancelada y no admite nuevos pagos ni cobros.':
+    'Esta conta foi cancelada e não admite novos pagamentos nem recebimentos.',
+  '¿Seguro que querés cancelar esta cuenta? Ingresá un motivo opcional:':
+    'Tem certeza que deseja cancelar esta conta? Informe um motivo opcional:',
+  'No se pudo cancelar la cuenta.': 'Não foi possível cancelar a conta.',
 
   /* --- BajaForm --------------------------------------------------------------------- */
   'Registrar pago': 'Registrar pagamento',

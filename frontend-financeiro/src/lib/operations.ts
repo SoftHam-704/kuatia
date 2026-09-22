@@ -143,7 +143,16 @@ export async function fetchDetalleCuenta(tipo: 'pagar' | 'cobrar', token: string
   const path = tipo === 'pagar' ? '/cuentas-pagar' : '/cuentas-cobrar';
   const body = await apiGet<CuentaDetalleRow>(`${path}/${cuentaId}/detalle`, token);
   return {
-    cuenta: toCuenta({ ...body.cuenta, saldo_minor: body.cuotas.reduce((total, cuota) => total + BigInt(cuota.saldo_minor), 0n).toString(), cuotas: body.cuotas.length, cuotas_pendientes: body.cuotas.filter((cuota) => BigInt(cuota.saldo_minor) > 0n).length, cuota_pendiente_id: null, cuota_pendiente_saldo_minor: null, estado: 'ABIERTO', hoy: new Date().toISOString().slice(0, 10) }),
+    cuenta: toCuenta({
+      ...body.cuenta,
+      saldo_minor: body.cuotas.reduce((total, cuota) => total + BigInt(cuota.saldo_minor), 0n).toString(),
+      cuotas: body.cuotas.length,
+      cuotas_pendientes: body.cuotas.filter((cuota) => BigInt(cuota.saldo_minor) > 0n).length,
+      cuota_pendiente_id: null,
+      cuota_pendiente_saldo_minor: null,
+      estado: body.cuenta.estado ?? 'ABIERTO',
+      hoy: new Date().toISOString().slice(0, 10),
+    }),
     cuotas: body.cuotas.map((row) => ({ id: String(row.id), numero: Number(row.numero_cuota), valorMinor: String(row.valor_minor), fechaVencimiento: row.fecha_vencimiento, aplicadoMinor: String(row.aplicado_minor), saldoMinor: String(row.saldo_minor) })),
     bajas: body.bajas.map((row) => ({ id: String(row.id), cuotaId: String(row.cuota_id), cuotaNumero: Number(row.numero_cuota), tipo: row.tipo, fecha: row.fecha, valorMinor: String(row.valor_minor), interesesMinor: String(row.intereses_minor), descuentoMinor: String(row.descuento_minor), observaciones: row.observaciones, reversionDeId: row.reversion_de_id == null ? null : String(row.reversion_de_id), revertida: row.revertida })),
   };
@@ -152,6 +161,16 @@ export async function fetchDetalleCuenta(tipo: 'pagar' | 'cobrar', token: string
 export function revertirBaja(tipo: 'pagar' | 'cobrar', token: string, bajaId: string, fecha: string): Promise<{ id: string | number }> {
   const path = tipo === 'pagar' ? '/cuentas-pagar' : '/cuentas-cobrar';
   return apiPost(`${path}/bajas/${bajaId}/reversion`, { fecha }, token);
+}
+
+export function cancelarCuenta(
+  tipo: 'pagar' | 'cobrar',
+  token: string,
+  cuentaId: string,
+  motivo?: string,
+): Promise<{ id: string | number; estado: 'CANCELADO' }> {
+  const path = tipo === 'pagar' ? '/cuentas-pagar' : '/cuentas-cobrar';
+  return apiPost(`${path}/${cuentaId}/cancelar`, { motivo }, token);
 }
 
 export interface Caja {

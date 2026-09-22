@@ -4,6 +4,7 @@ import { withTenantContext } from '../../config/database.js';
 import { authenticate } from '../../middleware/auth.js';
 import { assertInstallmentsTotal } from '../../domain/installments.js';
 import { asMinorUnit, assertAllBusinessDates } from '../../domain/validation.js';
+import { assertCanCancelAccount, assertCanSettleInstallment } from '../../domain/cancellation.js';
 import { recordAudit } from '../audit/audit.service.js';
 
 const router = Router();
@@ -85,12 +86,17 @@ router.get('/', authenticate, async (request, response) => {
                 cp.valor_total_minor, cp.fecha_emision::TEXT AS fecha_emision, cp.fecha_vencimiento::TEXT AS fecha_vencimiento,
                 e.razon_social AS empresa,
                 CURRENT_DATE::TEXT AS hoy,
-                COALESCE(s.saldo_minor, cp.valor_total_minor) AS saldo_minor,
+                CASE WHEN cp.estado = 'CANCELADO' THEN '0'
+                     ELSE COALESCE(s.saldo_minor, cp.valor_total_minor)::TEXT END AS saldo_minor,
                 COALESCE(s.cuotas, 0) AS cuotas,
-                COALESCE(s.cuotas_pendientes, 0) AS cuotas_pendientes,
-                pendiente.id AS cuota_pendiente_id,
-                pendiente.saldo_minor AS cuota_pendiente_saldo_minor,
-                CASE WHEN COALESCE(s.saldo_minor, cp.valor_total_minor) = 0 THEN 'PAGADO'
+                CASE WHEN cp.estado = 'CANCELADO' THEN 0
+                     ELSE COALESCE(s.cuotas_pendientes, 0) END AS cuotas_pendientes,
+                CASE WHEN cp.estado = 'CANCELADO' THEN NULL
+                     ELSE pendiente.id END AS cuota_pendiente_id,
+                CASE WHEN cp.estado = 'CANCELADO' THEN NULL
+                     ELSE pendiente.saldo_minor::TEXT END AS cuota_pendiente_saldo_minor,
+                CASE WHEN cp.estado = 'CANCELADO' THEN 'CANCELADO'
+                     WHEN COALESCE(s.saldo_minor, cp.valor_total_minor) = 0 THEN 'PAGADO'
                      WHEN cp.fecha_vencimiento < CURRENT_DATE THEN 'VENCIDO' ELSE 'ABIERTO' END AS estado
          FROM cuentas_pagar cp
          JOIN empresas e ON e.tenant_id = cp.tenant_id AND e.id = cp.empresa_id
@@ -131,6 +137,7 @@ router.get('/:id/detalle', authenticate, async (request, response) => {
       const cuenta = await client.query(
         `SELECT cp.id, cp.empresa_id, cp.descripcion, cp.numero_documento, cp.moneda,
                 cp.valor_total_minor::TEXT, cp.fecha_emision::TEXT, cp.fecha_vencimiento::TEXT,
+                cp.estado,
                 e.razon_social AS empresa
            FROM cuentas_pagar cp
            JOIN empresas e ON e.tenant_id = cp.tenant_id AND e.id = cp.empresa_id
@@ -176,14 +183,16 @@ router.post('/bajas', authenticate, async (request, response) => {
     const auth = request.auth!;
     const result = await withTenantContext({ tenantId: auth.tenantId, userId: auth.tenantUserCode, schema: auth.schema }, async (client) => {
       const cuota = await client.query(
-        `SELECT q.id, q.empresa_id, q.valor_minor, cp.moneda,
+        `SELECT q.id, q.empresa_id, q.valor_minor, cp.moneda, cp.estado AS cuenta_estado, q.estado AS cuota_estado,
                 COALESCE((SELECT SUM(CASE WHEN b.tipo='BAJA' THEN b.valor_pagado_minor+b.descuento_minor ELSE -(b.valor_pagado_minor+b.descuento_minor) END)
                  FROM bajas_pagar b WHERE b.tenant_id=q.tenant_id AND b.cuota_id=q.id), 0) AS aplicado_minor
          FROM cuotas_pagar q JOIN cuentas_pagar cp ON cp.tenant_id=q.tenant_id AND cp.id=q.cuenta_pagar_id
          WHERE q.tenant_id=$1 AND q.id=$2 FOR UPDATE`, [auth.tenantId, input.cuotaId],
       );
       if (!cuota.rowCount) throw new Error('Cuota no encontrada o sin acceso.');
-      const row = cuota.rows[0]; const interest = input.interesesMinor ?? 0n; const discount = input.descuentoMinor ?? 0n;
+      const row = cuota.rows[0];
+      assertCanSettleInstallment({ cuentaEstado: row.cuenta_estado, cuotaEstado: row.cuota_estado, tipo: 'pagar' });
+      const interest = input.interesesMinor ?? 0n; const discount = input.descuentoMinor ?? 0n;
       const applied = input.valorPagadoMinor + discount; const remaining = BigInt(row.valor_minor) - BigInt(row.aplicado_minor);
       if (applied <= 0n || applied > remaining) throw new Error('El pago y descuento no pueden superar el saldo de la cuota.');
       const cashAmount = input.valorPagadoMinor + interest - discount;
@@ -198,7 +207,7 @@ router.post('/bajas', authenticate, async (request, response) => {
            VALUES ($1,$2,$3,$4,$5,'D',$6,$7,'CP',$8) RETURNING id`,
           [auth.tenantId,row.empresa_id,input.cajaId,input.fecha,`Pago: ${input.cuotaId}`,row.moneda,asMinorUnit(cashAmount),input.cuotaId],
         ); movementId = movement.rows[0].id;
-      } else if (input.cajaId) throw new Error('No informe caja cuando el movimiento de efectivo es cero.');
+      } else if (input.cajaId) throw new Error('No informe caja quando el movimiento de efectivo es cero.');
       const created = await client.query(
         `INSERT INTO bajas_pagar (tenant_id,empresa_id,cuota_id,tipo,fecha,valor_pagado_minor,intereses_minor,descuento_minor,caja_id,movimiento_caja_id,observaciones,creado_por)
          VALUES ($1,$2,$3,'BAJA',$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id`,
@@ -232,6 +241,88 @@ router.post('/bajas/:id/reversion', authenticate, async (request, response) => {
       await recordAudit(client, { tenantId: auth.tenantId, userCode: auth.tenantUserCode, action: 'REVERSION', entity: 'BAJA_PAGAR', entityId: bajaId, empresaId: row.empresa_id, detail: { reversionId: reversed.rows[0].id } }); return { id:reversed.rows[0].id, reversionDeId:bajaId };
     },auth.pool); response.status(201).json(result);
   } catch(error){response.status(400).json({message:error instanceof z.ZodError?'Datos de reversión inválidos.':(error as Error).message});}
+});
+
+const cancelPayableSchema = z.object({
+  motivo: z.string().trim().max(1000).optional(),
+});
+
+router.post('/:id/cancelar', authenticate, async (request, response) => {
+  try {
+    const cuentaId = z.coerce.number().int().positive().parse(request.params.id);
+    const body = cancelPayableSchema.parse(request.body ?? {});
+    const auth = request.auth!;
+
+    const result = await withTenantContext(
+      { tenantId: auth.tenantId, userId: auth.tenantUserCode, schema: auth.schema },
+      async (client) => {
+        const cuentaRes = await client.query(
+          `SELECT id, empresa_id, descripcion, moneda, valor_total_minor, estado
+           FROM cuentas_pagar
+           WHERE tenant_id = $1 AND id = $2
+           FOR UPDATE`,
+          [auth.tenantId, cuentaId],
+        );
+        if (!cuentaRes.rowCount) throw new Error('Cuenta no encontrada o sin acceso.');
+        const cuenta = cuentaRes.rows[0];
+
+        const activeBajas = await client.query(
+          `SELECT 1
+           FROM bajas_pagar b
+           JOIN cuotas_pagar q ON q.tenant_id = b.tenant_id AND q.id = b.cuota_id
+           WHERE b.tenant_id = $1 AND q.cuenta_pagar_id = $2
+           GROUP BY b.cuota_id
+           HAVING SUM(CASE WHEN b.tipo = 'BAJA' THEN b.valor_pagado_minor + b.descuento_minor ELSE -(b.valor_pagado_minor + b.descuento_minor) END) > 0
+           LIMIT 1`,
+          [auth.tenantId, cuentaId],
+        );
+
+        assertCanCancelAccount({
+          estado: cuenta.estado,
+          activeBajasCount: activeBajas.rowCount ?? 0,
+          tipo: 'pagar',
+        });
+
+        await client.query(
+          `UPDATE cuentas_pagar
+           SET estado = 'CANCELADO'
+           WHERE tenant_id = $1 AND id = $2`,
+          [auth.tenantId, cuentaId],
+        );
+
+        await client.query(
+          `UPDATE cuotas_pagar
+           SET estado = 'CANCELADO'
+           WHERE tenant_id = $1 AND cuenta_pagar_id = $2`,
+          [auth.tenantId, cuentaId],
+        );
+
+        await recordAudit(client, {
+          tenantId: auth.tenantId,
+          userCode: auth.tenantUserCode,
+          action: 'CANCELAR',
+          entity: 'CUENTA_PAGAR',
+          entityId: cuentaId,
+          empresaId: cuenta.empresa_id,
+          detail: {
+            descripcion: cuenta.descripcion,
+            moneda: cuenta.moneda,
+            valorTotalMinor: String(cuenta.valor_total_minor),
+            motivo: body.motivo ?? 'Cancelación solicitada por el usuario',
+          },
+        });
+
+        return { id: cuentaId, estado: 'CANCELADO' };
+      },
+      auth.pool,
+    );
+
+    response.json(result);
+  } catch (error) {
+    response.status(400).json({
+      message: error instanceof z.ZodError ? 'Datos de cancelación inválidos.' : (error as Error).message,
+    });
+  }
 });
 
 export default router;

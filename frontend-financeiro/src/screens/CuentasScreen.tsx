@@ -14,7 +14,7 @@ import { t as tMsg } from '../i18n/translate';
 
 type Status = 'loading' | 'ready' | 'error';
 type SortKey = 'vencimiento' | 'saldo' | 'descripcion';
-type Filtro = 'pendientes' | 'vencidas' | 'liquidadas' | 'todas';
+type Filtro = 'pendientes' | 'vencidas' | 'liquidadas' | 'canceladas' | 'todas';
 
 /** Textos da tela por tipo de conta — chamadas t() literais para o teste de
  *  completude do i18n enxergar cada chave. */
@@ -43,6 +43,7 @@ function useTextos(tipo: 'pagar' | 'cobrar') {
 
 /** Estado exibido: derivado do saldo, não de um campo que alguém esqueceu de atualizar. */
 function estadoVisual(cuenta: Cuenta, liquidada: string, t: (text: string) => string) {
+  if (cuenta.estado === 'CANCELADO') return { clase: 'cancelado', texto: t('Cancelada') };
   const saldo = BigInt(cuenta.saldoMinor);
   const total = BigInt(cuenta.valorTotalMinor);
   if (saldo <= 0n) return { clase: 'pagado', texto: liquidada };
@@ -105,9 +106,14 @@ export function CuentasScreen({
     const texto = busqueda.trim().toLowerCase();
     const filtradas = cuentas.filter((cuenta) => {
       const saldo = BigInt(cuenta.saldoMinor);
-      if (filtro === 'pendientes' && saldo <= 0n) return false;
-      if (filtro === 'liquidadas' && saldo > 0n) return false;
-      if (filtro === 'vencidas' && !(saldo > 0n && cuenta.fechaVencimiento < cuenta.hoy)) return false;
+      if (cuenta.estado === 'CANCELADO') {
+        if (filtro !== 'canceladas' && filtro !== 'todas') return false;
+      } else {
+        if (filtro === 'canceladas') return false;
+        if (filtro === 'pendientes' && saldo <= 0n) return false;
+        if (filtro === 'liquidadas' && saldo > 0n) return false;
+        if (filtro === 'vencidas' && !(saldo > 0n && cuenta.fechaVencimiento < cuenta.hoy)) return false;
+      }
       if (moneda !== 'todas' && cuenta.moneda !== moneda) return false;
       if (!texto) return true;
       return (
@@ -256,6 +262,7 @@ export function CuentasScreen({
                     <option value="pendientes">{t('Con saldo')}</option>
                     <option value="vencidas">{t('Solo vencidas')}</option>
                     <option value="liquidadas">{textos.liquidadas}</option>
+                    <option value="canceladas">{t('Canceladas')}</option>
                     <option value="todas">{t('Todas')}</option>
                   </select>
                 </div>
@@ -375,7 +382,7 @@ export function CuentasScreen({
                             </td>
                             <td data-label={t('Acción')} className="is-actions">
                               <button type="button" className="ds-btn ds-btn--sm ds-btn--secondary" onClick={() => setDetalleCuenta(cuenta)}>{t('Detalle')}</button>
-                              {cuenta.cuotaPendienteId && <button type="button" className="ds-btn ds-btn--sm ds-btn--secondary" onClick={() => { setBajaCuota(null); setBajaCuenta(cuenta); }}>{tipo === 'pagar' ? t('Pagar') : t('Cobrar')}</button>}
+                              {cuenta.estado !== 'CANCELADO' && cuenta.cuotaPendienteId && <button type="button" className="ds-btn ds-btn--sm ds-btn--secondary" onClick={() => { setBajaCuota(null); setBajaCuenta(cuenta); }}>{tipo === 'pagar' ? t('Pagar') : t('Cobrar')}</button>}
                             </td>
                           </tr>
                         );
