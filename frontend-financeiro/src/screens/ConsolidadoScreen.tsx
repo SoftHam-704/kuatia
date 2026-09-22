@@ -111,7 +111,7 @@ export function ConsolidadoScreen({ token }: { token: string }) {
             <>
               {resumo && (
                 <div className="ds-kpi-grid">
-                  <article className="ds-kpi ds-kpi--accent">
+                  <article className="ds-kpi ds-kpi--gold">
                     <p className="ds-kpi__label">{t('Saldo en cajas y bancos')}</p>
                     <div className="ds-stack-2">
                       {resumo.saldos.map((item) => (

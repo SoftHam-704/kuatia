@@ -215,7 +215,7 @@ export function CuentasScreen({
           {totales.length > 0 && (
             <div className="ds-kpi-grid">
               {totales.map((total) => (
-                <article className={`ds-kpi${total.vencido > 0n ? ' ds-kpi--negative' : ' ds-kpi--accent'}`} key={total.moneda}>
+                <article className={`ds-kpi${total.vencido > 0n ? ' ds-kpi--negative' : tipo === 'cobrar' ? ' ds-kpi--positive' : ' ds-kpi--accent'}`} key={total.moneda}>
                   <p className="ds-kpi__label">
                     {textos.pendiente} <CurrencyChip code={total.moneda} />
                   </p>

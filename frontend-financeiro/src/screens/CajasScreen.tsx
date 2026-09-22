@@ -174,7 +174,7 @@ export function CajasScreen({ token, empresaId }: { token: string; empresaId: nu
         <>
           <div className="ds-kpi-grid">
             {saldosPorMoneda.map((item) => (
-              <article className="ds-kpi ds-kpi--accent" key={item.moneda}>
+              <article className={`ds-kpi ${item.moneda === 'BRL' ? 'ds-kpi--gold' : 'ds-kpi--accent'}`} key={item.moneda}>
                 <p className="ds-kpi__label">
                   {t('Saldo total')} <CurrencyChip code={item.moneda} />
                 </p>

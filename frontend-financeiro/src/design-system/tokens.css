@@ -74,30 +74,40 @@
   --amber-600: #a86f05;
   --amber-700: #855704;
 
-  /* Ouro Guaraní — acento de marca, uso raro (logo, destaque de consolidado) */
-  --gold-300: #e8c974;
+  /* Ouro Guaraní — identidade executiva de tesouraria e consolidado */
+  --gold-50:  #fefbf3;
+  --gold-100: #fbf3dc;
+  --gold-200: #f5e4b2;
+  --gold-300: #eccb7b;
+  --gold-400: #e0b852;
   --gold-500: #c8961e;
+  --gold-600: #ab7c12;
   --gold-700: #8e6710;
+  --gold-800: #6d4e0b;
+  --gold-gradient: linear-gradient(135deg, #ECCB7B 0%, #D8A538 48%, #B88219 100%);
+  --gold-card-bg:  linear-gradient(135deg, #ECCB7B 0%, #D8A538 48%, #B88219 100%);
+  --gold-card-border: #C8961E;
+  --gold-card-text: #0f172a;
 
   /* ---------------------------------------------------------------------------
      COR — tokens semânticos (é o que a UI usa)
      ------------------------------------------------------------------------ */
 
   /* Superfícies */
-  --bg-app:        var(--slate-50);
+  --bg-app:        #dfe7ef;
   --bg-surface:    var(--slate-0);
   --bg-raised:     var(--slate-0);
-  --bg-sunken:     var(--slate-100);
-  --bg-subtle:     var(--slate-25);
-  --bg-hover:      var(--slate-50);
+  --bg-sunken:     #eef3f8;
+  --bg-subtle:     #f6f9fc;
+  --bg-hover:      #e9f0f7;
   --bg-selected:   var(--blue-50);
   --bg-inverse:    var(--blue-900);
   --bg-backdrop:   rgb(12 42 69 / 0.55);
 
   /* Bordas */
-  --border-subtle: var(--slate-100);
-  --border:        var(--slate-200);
-  --border-strong: var(--slate-300);
+  --border-subtle: #e2e8f0;
+  --border:        #cad5e2;
+  --border-strong: #94a3b8;
   --border-inverse: rgb(255 255 255 / 0.14);
 
   /* Texto */
@@ -210,11 +220,14 @@
 
   --border-width: 1px;
 
-  /* Sombras — só onde algo realmente flutua */
-  --shadow-xs: 0 1px 2px rgb(12 42 69 / 0.06);
+  /* Sombras — profundidade e elevação arquitetural */
+  --shadow-xs: 0 1px 2px rgb(12 42 69 / 0.05);
   --shadow-sm: 0 1px 3px rgb(12 42 69 / 0.08), 0 1px 2px rgb(12 42 69 / 0.04);
-  --shadow-md: 0 4px 12px rgb(12 42 69 / 0.10), 0 1px 3px rgb(12 42 69 / 0.06);
-  --shadow-lg: 0 16px 40px rgb(12 42 69 / 0.16), 0 4px 12px rgb(12 42 69 / 0.08);
+  --shadow-md: 0 6px 18px rgb(12 42 69 / 0.09), 0 2px 6px rgb(12 42 69 / 0.04);
+  --shadow-lg: 0 16px 36px rgb(12 42 69 / 0.16), 0 6px 16px rgb(12 42 69 / 0.08);
+  --shadow-window: 0 14px 40px -4px rgb(12 42 69 / 0.16), 0 4px 14px rgb(12 42 69 / 0.06);
+  --shadow-window-active: 0 22px 50px -4px rgb(12 42 69 / 0.25), 0 8px 22px rgb(12 42 69 / 0.10);
+  --shadow-gold: 0 8px 24px rgb(200 150 30 / 0.28);
 
   /* ---------------------------------------------------------------------------
      DENSIDADE — [data-density="compact"] no <html> ou em qualquer container

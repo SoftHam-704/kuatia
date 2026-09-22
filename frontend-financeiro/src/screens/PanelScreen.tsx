@@ -71,7 +71,7 @@ function CurrencyBlock({ panel, moneda }: { panel: Panel; moneda: CurrencyCode }
       </div>
 
       <div className="ds-kpi-grid">
-        <article className="ds-kpi ds-kpi--accent">
+        <article className={`ds-kpi ${moneda === 'BRL' ? 'ds-kpi--gold' : 'ds-kpi--accent'}`}>
           <p className="ds-kpi__label">{t('Saldo en cajas y bancos')}</p>
           <p className="ds-kpi__value">
             <Money minor={saldo.toString()} currency={moneda} tone="signed" />

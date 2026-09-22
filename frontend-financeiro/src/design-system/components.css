@@ -412,7 +412,7 @@ input[inputmode='decimal'] {
   background: var(--bg-surface);
   border: var(--border-width) solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-xs);
+  box-shadow: 0 4px 16px rgba(12, 42, 69, 0.05), 0 1px 3px rgba(12, 42, 69, 0.03);
   overflow: hidden;
 }
 .ds-card__header {
@@ -445,17 +445,91 @@ input[inputmode='decimal'] {
   padding: var(--sp-4) var(--sp-5);
   background: var(--bg-surface);
   border: var(--border-width) solid var(--border);
-  border-left: 3px solid var(--border-strong);
+  border-left: 4px solid var(--border-strong);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-xs);
+  box-shadow: 0 4px 16px rgba(12, 42, 69, 0.05), 0 1px 3px rgba(12, 42, 69, 0.03);
+  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.ds-kpi:hover {
+  box-shadow: 0 8px 24px rgba(12, 42, 69, 0.08), 0 2px 6px rgba(12, 42, 69, 0.04);
 }
 .ds-kpi__label { font-size: var(--fs-sm); font-weight: var(--fw-medium); color: var(--text-secondary); display: flex; align-items: center; gap: var(--sp-2); }
-.ds-kpi__value { font-size: var(--fs-3xl); font-weight: var(--fw-semibold); line-height: var(--lh-tight); letter-spacing: -0.02em; }
+.ds-kpi__value { font-size: var(--fs-3xl); font-weight: var(--fw-bold); line-height: var(--lh-tight); letter-spacing: -0.02em; }
 .ds-kpi__meta  { font-size: var(--fs-xs); color: var(--text-muted); display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
-.ds-kpi--accent   { border-left-color: var(--accent); }
-.ds-kpi--positive { border-left-color: var(--positive); }
-.ds-kpi--negative { border-left-color: var(--negative); }
-.ds-kpi--warning  { border-left-color: var(--warning); }
+
+/* Variantes padrão com sutis gradientes térmicos verticais */
+.ds-kpi--accent   { border-left-color: var(--accent); background: linear-gradient(180deg, #FFFFFF 0%, #F5F9FD 100%); }
+.ds-kpi--positive { border-left-color: var(--positive); background: linear-gradient(180deg, #FFFFFF 0%, #F2FBF6 100%); }
+.ds-kpi--negative { border-left-color: var(--negative); background: linear-gradient(180deg, #FFFFFF 0%, #FEF4F3 100%); }
+.ds-kpi--warning  { border-left-color: var(--warning); background: linear-gradient(180deg, #FFFFFF 0%, #FEFBF2 100%); }
+
+/* Card Ouro Guaraní metálico com gradiente nobre */
+.ds-kpi--gold,
+.ds-card--gold {
+  background: var(--gold-card-bg);
+  color: var(--gold-card-text);
+  border: 1px solid var(--gold-card-border);
+  border-left: 1px solid var(--gold-card-border);
+  box-shadow: var(--shadow-gold);
+  position: relative;
+  overflow: hidden;
+}
+.ds-kpi--gold::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+  pointer-events: none;
+}
+.ds-kpi--gold .ds-kpi__label {
+  color: #3b2805;
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.02em;
+}
+.ds-kpi--gold .ds-kpi__value,
+.ds-kpi--gold .ds-money {
+  color: #0b1523;
+  font-weight: var(--fw-bold);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.35);
+}
+.ds-kpi--gold .ds-kpi__meta {
+  color: #4c3509;
+  font-weight: var(--fw-medium);
+}
+.ds-kpi--gold .ds-cur {
+  background: rgba(255, 255, 255, 0.45);
+  color: #2b1d03;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+/* Card Esmeralda (Entradas / A Receber) */
+.ds-kpi--emerald {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  color: #FFFFFF;
+  border: 1px solid #047857;
+  border-left: 1px solid #047857;
+  box-shadow: 0 8px 24px rgba(5, 150, 105, 0.26);
+}
+.ds-kpi--emerald .ds-kpi__label { color: rgba(255, 255, 255, 0.92); font-weight: var(--fw-semibold); }
+.ds-kpi--emerald .ds-kpi__value,
+.ds-kpi--emerald .ds-money { color: #FFFFFF; font-weight: var(--fw-bold); }
+.ds-kpi--emerald .ds-kpi__meta { color: rgba(255, 255, 255, 0.82); }
+.ds-kpi--emerald .ds-cur { background: rgba(255, 255, 255, 0.22); color: #FFFFFF; border-color: rgba(255, 255, 255, 0.35); }
+
+/* Card Carmesim (Saídas / A Pagar) */
+.ds-kpi--crimson {
+  background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+  color: #FFFFFF;
+  border: 1px solid #B91C1C;
+  border-left: 1px solid #B91C1C;
+  box-shadow: 0 8px 24px rgba(220, 38, 38, 0.26);
+}
+.ds-kpi--crimson .ds-kpi__label { color: rgba(255, 255, 255, 0.92); font-weight: var(--fw-semibold); }
+.ds-kpi--crimson .ds-kpi__value,
+.ds-kpi--crimson .ds-money { color: #FFFFFF; font-weight: var(--fw-bold); }
+.ds-kpi--crimson .ds-kpi__meta { color: rgba(255, 255, 255, 0.82); }
+.ds-kpi--crimson .ds-cur { background: rgba(255, 255, 255, 0.22); color: #FFFFFF; border-color: rgba(255, 255, 255, 0.35); }
 
 /* ---------------------------------------------------------------------------
    TABELAS — a tela onde o cliente vive
@@ -966,57 +1040,111 @@ input[inputmode='decimal'] {
    por tela cheia, como no TyresControl.
    ========================================================================== */
 .ds-cockpit { display: grid; grid-template-rows: var(--topbar-h) 1fr 44px; height: 100vh; height: 100dvh; overflow: hidden; }
-.ds-workspace { position: relative; overflow: hidden; background: var(--bg-app); }
+.ds-workspace {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--bg-app);
+  background-image:
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.45) 0%, transparent 80%),
+    linear-gradient(rgba(12, 42, 69, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(12, 42, 69, 0.035) 1px, transparent 1px);
+  background-size: 100% 100%, 32px 32px, 32px 32px;
+}
 
-/* A moldura por trás das janelas: uma marca d'água discreta que dá profundidade
-   sem competir com o dinheiro na tela. */
+/* A moldura por trás das janelas: profundidade com toques sutis de azul marinho e ouro */
 .ds-workspace::before {
   content: ''; position: absolute; inset: 0; pointer-events: none;
   background:
-    radial-gradient(60rem 40rem at 15% 0%, color-mix(in srgb, var(--blue-700) 5%, transparent), transparent 60%),
-    radial-gradient(50rem 34rem at 95% 100%, color-mix(in srgb, var(--gold-500) 5%, transparent), transparent 62%);
+    radial-gradient(70rem 45rem at 18% 0%, rgba(12, 42, 69, 0.07), transparent 70%),
+    radial-gradient(60rem 40rem at 85% 100%, rgba(200, 150, 30, 0.07), transparent 65%);
 }
 
 .ds-window {
-  position: absolute; display: flex; flex-direction: column;
-  border: var(--border-width) solid var(--border);
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #BAC9D8;
   border-radius: var(--radius-lg);
   background: var(--bg-surface);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-window);
   overflow: hidden;
+  transition: box-shadow 0.16s ease, border-color 0.16s ease;
 }
-.ds-window.is-active { box-shadow: var(--shadow-lg); border-color: var(--blue-100); }
+.ds-window.is-active {
+  box-shadow: var(--shadow-window-active);
+  border-color: #0C2A45;
+}
 .ds-window.is-maximized { inset: var(--sp-2) !important; width: auto !important; height: auto !important; }
-.ds-window.is-inactive .ds-window__titlebar { opacity: .82 }
+.ds-window.is-inactive .ds-window__titlebar {
+  background: linear-gradient(180deg, #183E62 0%, #112F4C 100%);
+  opacity: 0.88;
+}
 
 .ds-window__titlebar {
-  display: flex; align-items: center; gap: var(--sp-3);
-  padding: var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-4);
-  min-height: 44px; flex: none;
-  border-bottom: var(--border-width) solid var(--border-subtle, var(--border));
-  background: var(--bg-sunken);
-  cursor: grab; touch-action: none; user-select: none;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 0 var(--sp-3) 0 var(--sp-4);
+  min-height: 42px;
+  height: 42px;
+  flex: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(180deg, #123A5C 0%, #0C2A45 100%);
+  color: #FFFFFF;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
 }
-.ds-window__titlebar:active { cursor: grabbing }
+.ds-window__titlebar:active { cursor: grabbing; }
 .ds-window__identity { min-width: 0; display: grid; }
-.ds-window__title { font-size: var(--fs-sm); font-weight: var(--fw-semibold); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ds-window__context { font-size: var(--fs-2xs); color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ds-window__title {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: #FFFFFF;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ds-window__context {
+  font-size: var(--fs-2xs);
+  color: #93B5D4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 /* Alteração não salva: o aviso é texto, não só cor. */
 .ds-window__dirty {
-  flex: none; padding: 1px 7px; border-radius: var(--radius-pill);
-  background: var(--warning-subtle, color-mix(in srgb, var(--warning) 15%, transparent));
-  color: var(--warning); font-size: var(--fs-2xs); font-weight: var(--fw-semibold);
+  flex: none;
+  padding: 1px 8px;
+  border-radius: var(--radius-pill);
+  background: #D97706;
+  color: #FFFFFF;
+  font-size: var(--fs-2xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.02em;
 }
-.ds-window__actions { margin-left: auto; display: flex; gap: 2px; flex: none }
+.ds-window__actions { margin-left: auto; display: flex; gap: 4px; flex: none; align-items: center; }
 .ds-window__actions button {
-  display: grid; place-items: center; width: 32px; height: 32px;
-  border: 0; border-radius: var(--radius-sm); background: transparent;
-  color: var(--text-secondary); cursor: pointer;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
   transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
 }
-.ds-window__actions button:hover { background: var(--neutral-subtle); color: var(--text) }
-.ds-window__actions button.is-danger:hover { background: var(--negative); color: #fff }
-.ds-window__body { flex: 1; overflow: auto; padding: var(--sp-5) }
+.ds-window__actions button:hover { background: rgba(255, 255, 255, 0.22); color: #FFFFFF; }
+.ds-window__actions button.is-danger:hover { background: var(--negative); color: #FFFFFF; }
+.ds-window__body {
+  flex: 1;
+  overflow: auto;
+  padding: var(--sp-5);
+  background: #F4F7FA;
+}
 .ds-window__grip {
   position: absolute; right: 0; bottom: 0; width: 20px; height: 20px;
   border: 0; background: transparent; cursor: nwse-resize; touch-action: none;
@@ -1051,31 +1179,80 @@ input[inputmode='decimal'] {
 
 /* ── A faixa do rodapé: dock + estado, fundidos ─────────────────────────── */
 .ds-dock {
-  display: flex; align-items: center; gap: var(--sp-2);
-  height: 44px; padding-inline: var(--sp-2);
-  border-top: var(--border-width) solid var(--sidebar-border);
-  background: var(--sidebar-bg); color: var(--sidebar-fg-muted);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  height: 44px;
+  padding-inline: var(--sp-3);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  background: #0C2A45;
+  color: rgba(255, 255, 255, 0.75);
   font-size: var(--fs-xs);
+  box-shadow: 0 -4px 16px rgba(12, 42, 69, 0.12);
 }
-.ds-dock__chips { display: flex; align-items: center; gap: 4px; min-width: 0; overflow-x: auto; scrollbar-width: none }
+.ds-dock__chips { display: flex; align-items: center; gap: 6px; min-width: 0; overflow-x: auto; scrollbar-width: none }
 .ds-dock__chips::-webkit-scrollbar { display: none }
 .ds-dock__chip {
-  display: flex; align-items: center; gap: var(--sp-2);
-  height: 30px; padding-inline: var(--sp-3); flex: none;
-  border: var(--border-width) solid transparent; border-radius: var(--radius-md);
-  background: var(--sidebar-hover); color: var(--sidebar-fg-muted);
-  font-size: var(--fs-xs); cursor: pointer; max-width: 14rem;
-  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  height: 30px;
+  padding-inline: var(--sp-3);
+  flex: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.82);
+  font-size: var(--fs-xs);
+  cursor: pointer;
+  max-width: 14rem;
+  transition: all var(--dur-fast) var(--ease-out);
 }
-.ds-dock__chip:hover { background: var(--sidebar-active); color: var(--sidebar-fg) }
-.ds-dock__chip.is-active { background: var(--sidebar-active); color: var(--sidebar-fg); border-color: var(--gold-500) }
+.ds-dock__chip:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.ds-dock__chip.is-active {
+  background: rgba(255, 255, 255, 0.22);
+  color: #FFFFFF;
+  border-color: var(--gold-500);
+  box-shadow: 0 0 10px rgba(200, 150, 30, 0.4);
+}
 .ds-dock__chip.is-minimized { opacity: .55 }
 .ds-dock__chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 .ds-dock__chip i { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--warning) }
 .ds-dock__chip kbd {
-  flex: none; padding: 0 4px; border-radius: var(--radius-xs);
-  background: color-mix(in srgb, #000 25%, transparent);
-  font-size: var(--fs-2xs); font-family: inherit;
+  flex: none;
+  padding: 0 4px;
+  border-radius: var(--radius-xs);
+  background: rgba(0, 0, 0, 0.35);
+  font-size: var(--fs-2xs);
+  font-family: inherit;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ── Topbar overrides para o CompanySwitcher no Cockpit ──────────────────── */
+.ds-topbar .ds-company {
+  background: #F1F5F9;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.ds-topbar .ds-company:hover {
+  background: #E2E8F0;
+  border-color: var(--border-strong);
+}
+.ds-topbar .ds-company__label {
+  color: var(--text-muted);
+}
+.ds-topbar .ds-company__name {
+  color: var(--text);
+  font-weight: var(--fw-semibold);
+}
+.ds-topbar .ds-company__avatar {
+  background: var(--gold-500);
+  color: #0C2A45;
+  font-weight: var(--fw-bold);
 }
 
 @media (max-width: 1023px) { .ds-cockpit { display: none } }
