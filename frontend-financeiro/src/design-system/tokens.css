@@ -159,10 +159,10 @@
   --sidebar-hover:     rgb(255 255 255 / 0.08);
   --sidebar-active:    rgb(255 255 255 / 0.16);
 
-  /* Moedas — identidade discreta para nunca confundir totais no consolidado */
-  --cur-pyg-bg: var(--blue-50);     --cur-pyg-fg: var(--blue-800);   --cur-pyg-bd: var(--blue-200);
-  --cur-usd-bg: var(--green-50);    --cur-usd-fg: var(--green-800);  --cur-usd-bd: var(--green-200);
-  --cur-brl-bg: var(--amber-50);    --cur-brl-fg: var(--amber-700);  --cur-brl-bd: var(--amber-200);
+  /* Moedas — identidade cromática vibrante e de alto contraste */
+  --cur-pyg-bg: #e0edff;     --cur-pyg-fg: #1d4ed8;   --cur-pyg-bd: #93c5fd;
+  --cur-usd-bg: #dcfce7;     --cur-usd-fg: #15803d;   --cur-usd-bd: #86efac;
+  --cur-brl-bg: #fef3c7;     --cur-brl-fg: #b45309;   --cur-brl-bd: #fde68a;
 
   /* ---------------------------------------------------------------------------
      TIPOGRAFIA

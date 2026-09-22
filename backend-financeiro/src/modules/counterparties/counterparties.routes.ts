@@ -39,4 +39,49 @@ router.post('/', authenticate, async (request, response) => {
   } catch (error) { response.status(400).json({ message: error instanceof z.ZodError ? 'Datos de cliente o proveedor inválidos.' : (error as Error).message }); }
 });
 
+router.put('/:id', authenticate, async (request, response) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(request.params.id);
+    const input = schema.parse(request.body);
+    const auth = request.auth!;
+    const updated = await withTenantContext({ tenantId: auth.tenantId, userId: auth.tenantUserCode, schema: auth.schema }, async (client) => {
+      const result = await client.query(
+        `UPDATE contrapartes
+         SET tipo_persona = $3, ruc = $4, razon_social = $5, nombre_fantasia = $6,
+             direccion = $7, numero = $8, barrio = $9, ciudad = $10,
+             departamento = $11, telefono = $12, celular = $13, email = $14,
+             observaciones = $15, atualizado_em = CURRENT_TIMESTAMP
+         WHERE tenant_id = $1 AND id = $2
+         RETURNING id, razon_social, ruc`,
+        [auth.tenantId, id, input.tipoPersona, input.ruc ?? null, input.razonSocial, input.nombreFantasia ?? null,
+         input.direccion ?? null, input.numero ?? null, input.barrio ?? null, input.ciudad ?? null,
+         input.departamento ?? null, input.telefono ?? null, input.celular ?? null, input.email ?? null, input.observaciones ?? null],
+      );
+      if (!result.rowCount) throw new Error('Cliente o proveedor no encontrado.');
+      return result.rows[0];
+    }, auth.pool);
+    response.json(updated);
+  } catch (error) {
+    response.status(400).json({ message: error instanceof z.ZodError ? 'Datos inválidos.' : (error as Error).message });
+  }
+});
+
+router.delete('/:id', authenticate, async (request, response) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(request.params.id);
+    const auth = request.auth!;
+    await withTenantContext({ tenantId: auth.tenantId, userId: auth.tenantUserCode, schema: auth.schema }, async (client) => {
+      const result = await client.query(
+        `UPDATE contrapartes SET activo = FALSE, atualizado_em = CURRENT_TIMESTAMP
+         WHERE tenant_id = $1 AND id = $2 RETURNING id`,
+        [auth.tenantId, id],
+      );
+      if (!result.rowCount) throw new Error('Cliente o proveedor no encontrado.');
+    }, auth.pool);
+    response.status(204).send();
+  } catch (error) {
+    response.status(400).json({ message: (error as Error).message || 'No se pudo eliminar el contacto.' });
+  }
+});
+
 export default router;

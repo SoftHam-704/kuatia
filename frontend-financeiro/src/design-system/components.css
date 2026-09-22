@@ -296,6 +296,51 @@ input[inputmode='decimal'] {
 .ds-btn--danger    { background: var(--negative); color: #fff; }
 .ds-btn--danger:hover:not([disabled]) { background: var(--negative-strong); }
 
+/* Botões semânticos de ação para tabelas/grids */
+.ds-btn--edit {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+  font-weight: var(--fw-medium);
+}
+.ds-btn--edit:hover:not([disabled]) {
+  background: #dbeafe;
+  color: #1e40af;
+  border-color: #93c5fd;
+}
+.ds-btn--delete {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+  font-weight: var(--fw-medium);
+}
+.ds-btn--delete:hover:not([disabled]) {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #fca5a5;
+}
+.ds-btn--pay {
+  background: #ecfdf5;
+  color: #059669;
+  border-color: #a7f3d0;
+  font-weight: var(--fw-semibold);
+}
+.ds-btn--pay:hover:not([disabled]) {
+  background: #d1fae5;
+  color: #047857;
+  border-color: #6ee7b7;
+}
+.ds-btn--detail {
+  background: #f8fafc;
+  color: #334155;
+  border-color: #cbd5e1;
+}
+.ds-btn--detail:hover:not([disabled]) {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
 /* Ações destrutivas de histórico não existem. Estorno é uma ação declarada. */
 .ds-btn--reversion { background: var(--warning-subtle); color: var(--warning-strong); border-color: var(--warning-border); }
 .ds-btn--reversion:hover:not([disabled]) { background: var(--amber-100); }
@@ -551,17 +596,17 @@ input[inputmode='decimal'] {
   position: sticky;
   top: 0;
   z-index: 2;
-  background: var(--bg-subtle);
+  background: #edf2f7;
   padding: var(--row-pad-y) var(--sp-4);
-  height: 40px;
+  height: 42px;
   text-align: left;
   font-size: var(--fs-2xs);
-  font-weight: var(--fw-semibold);
+  font-weight: var(--fw-bold);
   text-transform: uppercase;
   letter-spacing: var(--tracking-caps);
-  color: var(--text-muted);
+  color: #1e293b;
   white-space: nowrap;
-  border-bottom: var(--border-width) solid var(--border);
+  border-bottom: 2px solid #cbd5e1;
 }
 .ds-table tbody td {
   padding: var(--row-pad-y) var(--sp-4);
@@ -601,37 +646,37 @@ input[inputmode='decimal'] {
 .ds-th-sort[aria-sort] { color: var(--text); }
 
 /* ---------------------------------------------------------------------------
-   BADGES DE ESTADO — derivados do dado, nunca digitados
+   BADGES DE ESTADO — alto contraste e saturação executiva
    ------------------------------------------------------------------------ */
 .ds-badge {
   display: inline-flex;
   align-items: center;
-  gap: var(--sp-1);
-  height: 22px;
-  padding: 0 var(--sp-2);
+  gap: 5px;
+  height: 24px;
+  padding: 0 8px;
   border-radius: var(--radius-sm);
-  border: var(--border-width) solid transparent;
+  border: 1px solid transparent;
   font-size: var(--fs-2xs);
-  font-weight: var(--fw-semibold);
-  letter-spacing: 0.02em;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.03em;
   text-transform: uppercase;
   white-space: nowrap;
 }
 .ds-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
 
-.ds-badge--abierto   { background: var(--accent-subtle);   color: var(--accent-text);      border-color: var(--accent-border); }
+.ds-badge--abierto   { background: #eff6ff; color: #1d4ed8; border-color: #93c5fd; }
 .ds-badge--pagado,
-.ds-badge--cobrado   { background: var(--positive-subtle); color: var(--positive-strong);  border-color: var(--positive-border); }
-.ds-badge--vencido   { background: var(--negative-subtle); color: var(--negative-strong);  border-color: var(--negative-border); }
-.ds-badge--parcial   { background: var(--warning-subtle);  color: var(--warning-strong);   border-color: var(--warning-border); }
-.ds-badge--cancelado { background: var(--neutral-subtle);  color: var(--text-muted);       border-color: var(--neutral-border); }
-.ds-badge--reversion { background: var(--neutral-subtle);  color: var(--text-secondary);   border-color: var(--neutral-border); }
-.ds-badge--incompleto{ background: var(--warning-subtle);  color: var(--warning-strong);   border-color: var(--warning-border); }
+.ds-badge--cobrado   { background: #ecfdf5; color: #047857; border-color: #6ee7b7; box-shadow: 0 1px 3px rgba(16, 185, 129, 0.15); }
+.ds-badge--vencido   { background: #fef2f2; color: #b91c1c; border-color: #fca5a5; box-shadow: 0 1px 4px rgba(239, 68, 68, 0.18); }
+.ds-badge--parcial   { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+.ds-badge--cancelado { background: #f1f5f9; color: #64748b; border-color: #cbd5e1; }
+.ds-badge--reversion { background: #f1f5f9; color: #475569; border-color: #cbd5e1; }
+.ds-badge--incompleto{ background: #fffbeb; color: #b45309; border-color: #fde68a; }
 
 /* Progresso de baixa parcial: mostrar quanto já foi pago, não só o estado. */
-.ds-progress { width: 100%; max-width: 120px; height: 6px; border-radius: var(--radius-pill); background: var(--bg-sunken); overflow: hidden; }
-.ds-progress__bar { height: 100%; border-radius: inherit; background: var(--positive); }
-.ds-progress--warning .ds-progress__bar { background: var(--warning); }
+.ds-progress { width: 100%; max-width: 120px; height: 7px; border-radius: var(--radius-pill); background: #e2e8f0; overflow: hidden; }
+.ds-progress__bar { height: 100%; border-radius: inherit; background: linear-gradient(90deg, #10b981 0%, #059669 100%); }
+.ds-progress--warning .ds-progress__bar { background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%); }
 
 /* Seletor de idioma (ES/PT). Segmented control mínimo, mesma altura dos botões sm. */
 .ds-locale { display: inline-flex; align-items: center; border: var(--border-width) solid var(--border); border-radius: var(--radius-sm); overflow: hidden; background: var(--bg-sunken); }

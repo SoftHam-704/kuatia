@@ -587,5 +587,51 @@ export const PT_BR: Record<string, string> = {
   'No se pudo leer la planilla.': 'Não foi possível ler a planilha.',
   'No se pudo importar la planilla.': 'Não foi possível importar a planilha.',
   'Planilla importada con éxito: {n} registros creados.': 'Planilha importada com sucesso: {n} registros criados.',
+
+  /* --- Ações CRUD Diretas e Modais (Edição e Exclusão) -------------------------- */
+  'No se pudo desactivar la cuenta.': 'Não foi possível desativar a conta.',
+  'Desactivar': 'Desativar',
+  'Desactivar cuenta': 'Desativar conta',
+  '¿Seguro que querés desactivar la cuenta "{nombre}"?': 'Tem certeza de que deseja desativar a conta "{nombre}"?',
+  'La cuenta quedará oculta para nuevas operaciones, pero se conservan todos sus movimientos históricos.':
+    'A conta ficará oculta para novas operações, mas todos os seus lançamentos históricos serão preservados.',
+  'Desactivando…': 'Desativando…',
+  'No se pudo eliminar el centro de costo.': 'Não foi possível excluir o centro de custo.',
+  'Excluir': 'Excluir',
+  'Editar centro de costo': 'Editar centro de custo',
+  'Eliminar centro de costo': 'Excluir centro de custo',
+  '¿Seguro que querés desactivar el centro de costo "{descripcion}"?':
+    'Tem certeza de que deseja desativar o centro de custo "{descripcion}"?',
+  'El centro de costo quedará desactivado y no podrá asignarse a nuevos lanzamientos.':
+    'O centro de custo ficará desativado e não poderá ser vinculado a novos lançamentos.',
+  'Eliminando…': 'Excluindo…',
+  'Confirmar': 'Confirmar',
+  'No se pudo eliminar el contacto.': 'Não foi possível excluir o contato.',
+  'Editar cliente o proveedor': 'Editar cliente ou fornecedor',
+  'Teléfono': 'Telefone',
+  'Email': 'E-mail',
+  'Eliminar contacto': 'Excluir contato',
+  '¿Seguro que querés desactivar el contacto "{razon}"?': 'Tem certeza de que deseja desativar o contato "{razon}"?',
+  'El contacto ya no aparecerá para nuevos lançamientos, pero sus registros históricos se conservarán.':
+    'O contato não aparecerá mais para novos lançamentos, mas seus registros históricos serão preservados.',
+  'Volver': 'Voltar',
+  '¿Seguro que querés cancelar la cuenta "{descripcion}"? Todas las cuotas pendientes quedarán canceladas.':
+    'Tem certeza de que deseja cancelar a conta "{descripcion}"? Todas as parcelas pendentes serão canceladas.',
+  'Motivo de cancelación': 'Motivo do cancelamento',
+  'Ej: error en factura, duplicado, etc.': 'Ex: erro na fatura, duplicidade, etc.',
+  'Confirmar cancelación': 'Confirmar cancelamento',
+  'Ver detalle': 'Ver detalhes',
+  'No se pudo guardar la empresa.': 'Não foi possível salvar a empresa.',
+  'No se pudo desactivar la empresa.': 'Não foi possível desativar a empresa.',
+  'Editar empresa': 'Editar empresa',
+  'Desactivar empresa': 'Desativar empresa',
+  '¿Seguro que querés desactivar la empresa "{razon}"?': 'Tem certeza de que deseja desativar a empresa "{razon}"?',
+  'La empresa quedará inactiva y no podrá ser seleccionada para nuevas operaciones.':
+    'A empresa ficará inativa e não poderá ser selecionada para novas operações.',
+  'No se pudo desactivar el usuario.': 'Não foi possível desativar o usuário.',
+  'Desactivar usuario': 'Desativar usuário',
+  '¿Seguro que querés desactivar el usuario "{nombre}"?': 'Tem certeza de que deseja desativar o usuário "{nombre}"?',
+  'El usuario ya no podrá iniciar sesión en ninguna empresa del grupo.':
+    'O usuário não poderá mais iniciar sessão em nenhuma empresa do grupo.',
 };
 

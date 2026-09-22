@@ -35,4 +35,44 @@ router.post('/', authenticate, async (request, response) => {
   }
 });
 
+router.put('/:id', authenticate, async (request, response) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(request.params.id);
+    const updateSchema = z.object({ codigo: z.string().trim().max(20).optional(), descripcion: z.string().trim().min(2).max(100) });
+    const input = updateSchema.parse(request.body);
+    const auth = request.auth!;
+    const updated = await withTenantContext({ tenantId: auth.tenantId, userId: auth.tenantUserCode, schema: auth.schema }, async (client) => {
+      const result = await client.query(
+        `UPDATE centros_costo
+         SET codigo = $3, descripcion = $4
+         WHERE tenant_id = $1 AND id = $2
+         RETURNING id, codigo, descripcion`,
+        [auth.tenantId, id, input.codigo ?? null, input.descripcion],
+      );
+      if (!result.rowCount) throw new Error('Centro de costo no encontrado.');
+      return result.rows[0];
+    }, auth.pool);
+    response.json(updated);
+  } catch (error) {
+    response.status(400).json({ message: error instanceof z.ZodError ? 'Datos inválidos.' : (error as Error).message });
+  }
+});
+
+router.delete('/:id', authenticate, async (request, response) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(request.params.id);
+    const auth = request.auth!;
+    await withTenantContext({ tenantId: auth.tenantId, userId: auth.tenantUserCode, schema: auth.schema }, async (client) => {
+      const result = await client.query(
+        `DELETE FROM centros_costo WHERE tenant_id = $1 AND id = $2 RETURNING id`,
+        [auth.tenantId, id],
+      );
+      if (!result.rowCount) throw new Error('Centro de costo no encontrado.');
+    }, auth.pool);
+    response.status(204).send();
+  } catch (error) {
+    response.status(400).json({ message: (error as Error).message || 'No se pudo eliminar el centro de costo.' });
+  }
+});
+
 export default router;

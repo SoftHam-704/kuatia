@@ -106,4 +106,24 @@ router.put('/:codigo', authenticate, requireTenantAdmin, async (request, respons
   } catch (error) { response.status(400).json({ message: error instanceof z.ZodError ? 'Datos de usuario inválidos.' : (error as Error).message }); }
 });
 
+router.delete('/:codigo', authenticate, requireTenantAdmin, async (request, response) => {
+  try {
+    const sourceCode = code.parse(request.params.codigo);
+    const auth = request.auth!;
+    if (sourceCode === auth.tenantUserCode) throw new Error('No podés desactivar tu propia cuenta mientras estás logueado.');
+    await withTenantContext({ tenantId: auth.tenantId, userId: auth.tenantUserCode, schema: auth.schema }, async (client) => {
+      const result = await client.query('UPDATE user_nomes SET ativo = FALSE WHERE codigo = $1 RETURNING codigo', [sourceCode]);
+      if (!result.rowCount) throw new Error('Usuario no encontrado.');
+      await client.query('UPDATE usuarios SET activo = FALSE WHERE tenant_id = $1 AND usuario_origem_codigo = $2', [auth.tenantId, sourceCode]);
+      await recordAudit(client, {
+        tenantId: auth.tenantId, userCode: auth.tenantUserCode,
+        action: 'DESACTIVAR', entity: 'USUARIO', entityId: sourceCode,
+      });
+    }, auth.pool);
+    response.status(204).send();
+  } catch (error) {
+    response.status(400).json({ message: (error as Error).message || 'No se pudo desactivar el usuario.' });
+  }
+});
+
 export default router;

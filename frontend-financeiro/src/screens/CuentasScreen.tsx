@@ -4,11 +4,13 @@ import { describeDueDate, formatDate } from '../design-system/format';
 import type { CurrencyCode } from '../design-system/format';
 import { ApiError, apiDownload } from '../lib/api';
 import { sortCurrencies } from '../lib/panel';
-import { fetchCuentas } from '../lib/operations';
+import { fetchCuentas, cancelarCuenta } from '../lib/operations';
 import type { Cuenta, CuotaDetalle } from '../lib/operations';
 import { CuentaForm } from '../components/CuentaForm';
 import { BajaForm } from '../components/BajaForm';
 import { CuentaDetail } from '../components/CuentaDetail';
+import { CuentaEditModal } from '../components/CuentaEditModal';
+import { Modal } from '../components/Modal';
 import { useI18n } from '../i18n/useI18n';
 import { t as tMsg } from '../i18n/translate';
 
@@ -81,6 +83,11 @@ export function CuentasScreen({
   const [bajaCuenta, setBajaCuenta] = useState<Cuenta | null>(null);
   const [bajaCuota, setBajaCuota] = useState<CuotaDetalle | null>(null);
   const [detalleCuenta, setDetalleCuenta] = useState<Cuenta | null>(null);
+  const [editingCuenta, setEditingCuenta] = useState<Cuenta | null>(null);
+  const [cancelingCuenta, setCancelingCuenta] = useState<Cuenta | null>(null);
+  const [cancelMotivo, setCancelMotivo] = useState('');
+  const [savingCancel, setSavingCancel] = useState(false);
+  const [cancelError, setCancelError] = useState('');
 
   const load = useCallback(async () => {
     setStatus('loading');
@@ -154,6 +161,22 @@ export function CuentasScreen({
   const ariaSort = (key: SortKey) =>
     orden.key === key ? (orden.dir === 'asc' ? 'ascending' : 'descending') : undefined;
 
+  async function handleCancelAccount() {
+    if (!cancelingCuenta) return;
+    setSavingCancel(true);
+    setCancelError('');
+    try {
+      await cancelarCuenta(tipo, token, cancelingCuenta.id, cancelMotivo.trim() || undefined);
+      setCancelingCuenta(null);
+      setCancelMotivo('');
+      void load();
+    } catch (failure) {
+      setCancelError(failure instanceof ApiError ? failure.message : tMsg('No se pudo cancelar la cuenta.'));
+    } finally {
+      setSavingCancel(false);
+    }
+  }
+
   async function exportar(formato: 'xlsx' | 'pdf') {
     try {
       await apiDownload(`/exportaciones/cuentas?empresaId=${empresaId}&tipo=${tipo === 'pagar' ? 'PAGAR' : 'COBRAR'}&formato=${formato}`, `kuatia-${tipo}-${new Date().toISOString().slice(0, 10)}.${formato}`, token);
@@ -186,6 +209,53 @@ export function CuentasScreen({
       {creating && <CuentaForm tipo={tipo} token={token} empresaId={empresaId} onClose={() => setCreating(false)} onDone={() => void load()} />}
       {bajaCuenta && <BajaForm tipo={tipo} token={token} empresaId={empresaId} cuenta={bajaCuenta} cuotaId={bajaCuota?.id} cuotaNumero={bajaCuota?.numero} cuotaSaldoMinor={bajaCuota?.saldoMinor} onClose={() => { setBajaCuenta(null); setBajaCuota(null); }} onDone={() => void load()} />}
       {detalleCuenta && <CuentaDetail tipo={tipo} token={token} cuenta={detalleCuenta} onClose={() => setDetalleCuenta(null)} onChanged={() => void load()} onSettle={(cuota) => { setDetalleCuenta(null); setBajaCuota(cuota); setBajaCuenta(detalleCuenta); }} />}
+      {editingCuenta && (
+        <CuentaEditModal
+          cuenta={editingCuenta}
+          tipo={tipo}
+          token={token}
+          onClose={() => setEditingCuenta(null)}
+          onDone={() => {
+            setEditingCuenta(null);
+            void load();
+          }}
+        />
+      )}
+      {cancelingCuenta && (
+        <Modal title={t('Cancelar cuenta')} onClose={() => setCancelingCuenta(null)}>
+          <form className="ds-modal__body ds-stack-3" onSubmit={(e) => { e.preventDefault(); void handleCancelAccount(); }}>
+            <p className="ds-body">
+              {t('¿Seguro que querés cancelar la cuenta "{descripcion}"? Todas las cuotas pendientes quedarán canceladas.', { descripcion: cancelingCuenta.descripcion })}
+            </p>
+            <div className="ds-field">
+              <label className="ds-label" htmlFor="cancel-motivo">
+                {t('Motivo de cancelación')} <span className="ds-label__optional">{t('(opcional)')}</span>
+              </label>
+              <input
+                id="cancel-motivo"
+                className="ds-input"
+                value={cancelMotivo}
+                onChange={(e) => setCancelMotivo(e.target.value)}
+                placeholder={t('Ej: error en factura, duplicado, etc.')}
+                autoFocus
+              />
+            </div>
+            {cancelError && (
+              <div className="ds-alert ds-alert--danger">
+                <div className="ds-alert__body"><p>{cancelError}</p></div>
+              </div>
+            )}
+            <footer className="ds-modal__footer">
+              <button type="button" className="ds-btn ds-btn--secondary" onClick={() => setCancelingCuenta(null)}>
+                {t('Volver')}
+              </button>
+              <button type="submit" className="ds-btn ds-btn--danger" disabled={savingCancel}>
+                {savingCancel ? t('Cancelando…') : t('Confirmar cancelación')}
+              </button>
+            </footer>
+          </form>
+        </Modal>
+      )}
 
       {status === 'error' && (
         <div className="ds-alert ds-alert--danger" role="alert">
@@ -381,8 +451,18 @@ export function CuentasScreen({
                               <span className={`ds-badge ds-badge--${estado.clase}`}>{estado.texto}</span>
                             </td>
                             <td data-label={t('Acción')} className="is-actions">
-                              <button type="button" className="ds-btn ds-btn--sm ds-btn--secondary" onClick={() => setDetalleCuenta(cuenta)}>{t('Detalle')}</button>
-                              {cuenta.estado !== 'CANCELADO' && cuenta.cuotaPendienteId && <button type="button" className="ds-btn ds-btn--sm ds-btn--secondary" onClick={() => { setBajaCuota(null); setBajaCuenta(cuenta); }}>{tipo === 'pagar' ? t('Pagar') : t('Cobrar')}</button>}
+                              <div style={{ display: 'inline-flex', gap: '4px', flexWrap: 'nowrap' }}>
+                                <button type="button" className="ds-btn ds-btn--sm ds-btn--detail" onClick={() => setDetalleCuenta(cuenta)} title={t('Ver detalle')}>{t('Detalle')}</button>
+                                {cuenta.estado !== 'CANCELADO' && (
+                                  <button type="button" className="ds-btn ds-btn--sm ds-btn--edit" onClick={() => setEditingCuenta(cuenta)} title={t('Editar')}>{t('Editar')}</button>
+                                )}
+                                {cuenta.estado !== 'CANCELADO' && (
+                                  <button type="button" className="ds-btn ds-btn--sm ds-btn--delete" onClick={() => { setCancelingCuenta(cuenta); setCancelMotivo(''); setCancelError(''); }} title={t('Cancelar')}>{t('Cancelar')}</button>
+                                )}
+                                {cuenta.estado !== 'CANCELADO' && cuenta.cuotaPendienteId && (
+                                  <button type="button" className="ds-btn ds-btn--sm ds-btn--pay" onClick={() => { setBajaCuota(null); setBajaCuenta(cuenta); }} title={tipo === 'pagar' ? t('Pagar') : t('Cobrar')}>{tipo === 'pagar' ? t('Pagar') : t('Cobrar')}</button>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         );

@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { CurrencyChip, Money } from '../components/Money';
 import { formatDate } from '../design-system/format';
 import type { CurrencyCode } from '../design-system/format';
-import { ApiError, apiDownload } from '../lib/api';
+import { ApiError, apiDownload, apiPut, apiDelete } from '../lib/api';
 import { sortCurrencies } from '../lib/panel';
 import { fetchCajas, fetchMovimientos } from '../lib/operations';
 import type { Caja, Movimiento } from '../lib/operations';
 import { CajaActionForm } from '../components/CajaActionForm';
+import { Modal } from '../components/Modal';
 import { useI18n } from '../i18n/useI18n';
 import { t as tMsg } from '../i18n/translate';
 
@@ -42,6 +43,50 @@ export function CajasScreen({ token, empresaId }: { token: string; empresaId: nu
   const [desde, setDesde] = useState('');
   const [hasta, setHasta] = useState('');
   const [action, setAction] = useState<'caja' | 'movimiento' | 'transferencia' | null>(null);
+  const [editingCaja, setEditingCaja] = useState<Caja | null>(null);
+  const [deletingCaja, setDeletingCaja] = useState<Caja | null>(null);
+  const [editNombre, setEditNombre] = useState('');
+  const [editTipo, setEditTipo] = useState<'caja' | 'banco'>('caja');
+  const [savingCaja, setSavingCaja] = useState(false);
+  const [actionError, setActionError] = useState('');
+
+  function openEditCaja(caja: Caja) {
+    setEditingCaja(caja);
+    setEditNombre(caja.nombre);
+    setEditTipo(caja.tipo);
+    setActionError('');
+  }
+
+  async function handleSaveEditCaja(e: FormEvent) {
+    e.preventDefault();
+    if (!editingCaja) return;
+    setSavingCaja(true);
+    setActionError('');
+    try {
+      await apiPut(`/cajas/${editingCaja.id}`, { nombre: editNombre, tipo: editTipo }, token);
+      setEditingCaja(null);
+      void load();
+    } catch (err) {
+      setActionError(err instanceof ApiError ? err.message : tMsg('No se pudo guardar la cuenta.'));
+    } finally {
+      setSavingCaja(false);
+    }
+  }
+
+  async function handleDeleteCaja() {
+    if (!deletingCaja) return;
+    setSavingCaja(true);
+    setActionError('');
+    try {
+      await apiDelete(`/cajas/${deletingCaja.id}`, token);
+      setDeletingCaja(null);
+      void load();
+    } catch (err) {
+      setActionError(err instanceof ApiError ? err.message : tMsg('No se pudo desactivar la cuenta.'));
+    } finally {
+      setSavingCaja(false);
+    }
+  }
 
   const load = useCallback(async () => {
     setCajasStatus('loading');
@@ -212,6 +257,7 @@ export function CajasScreen({ token, empresaId }: { token: string; empresaId: nu
                         <th scope="col" className="is-num">{t('Saldo')}</th>
                         <th scope="col" className="is-num">{t('Movimientos')}</th>
                         <th scope="col">{t('Último movimiento')}</th>
+                        <th scope="col" className="is-actions">{t('Acción')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -236,6 +282,26 @@ export function CajasScreen({ token, empresaId }: { token: string; empresaId: nu
                           <td className="is-num is-muted" data-label={t('Movimientos')}>{caja.movimientos}</td>
                           <td data-label={t('Último movimiento')} className="is-muted">
                             {caja.ultimoMovimiento ? formatDate(caja.ultimoMovimiento) : t('Sin movimientos')}
+                          </td>
+                          <td data-label={t('Acción')} className="is-actions" onClick={(e) => e.stopPropagation()}>
+                            <div style={{ display: 'inline-flex', gap: '4px' }}>
+                              <button
+                                type="button"
+                                className="ds-btn ds-btn--sm ds-btn--edit"
+                                onClick={() => openEditCaja(caja)}
+                                title={t('Editar')}
+                              >
+                                {t('Editar')}
+                              </button>
+                              <button
+                                type="button"
+                                className="ds-btn ds-btn--sm ds-btn--delete"
+                                onClick={() => { setDeletingCaja(caja); setActionError(''); }}
+                                title={t('Desactivar')}
+                              >
+                                {t('Desactivar')}
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -423,6 +489,92 @@ export function CajasScreen({ token, empresaId }: { token: string; empresaId: nu
             )}
           </section>
         </>
+      )}
+
+      {editingCaja && (
+        <Modal title={t('Editar cuenta')} onClose={() => setEditingCaja(null)}>
+          <form className="ds-modal__body ds-stack-2" onSubmit={handleSaveEditCaja}>
+            {actionError && (
+              <div className="ds-alert ds-alert--danger">
+                <div className="ds-alert__body">
+                  <p>{actionError}</p>
+                </div>
+              </div>
+            )}
+            <div className="ds-field">
+              <label className="ds-label">{t('Nombre')}</label>
+              <input
+                className="ds-input"
+                value={editNombre}
+                onChange={(e) => setEditNombre(e.target.value)}
+                required
+                autoFocus
+              />
+            </div>
+            <div className="ds-field">
+              <label className="ds-label">{t('Tipo')}</label>
+              <select
+                className="ds-select"
+                value={editTipo}
+                onChange={(e) => setEditTipo(e.target.value as 'caja' | 'banco')}
+              >
+                <option value="caja">{t('Caja')}</option>
+                <option value="banco">{t('Banco')}</option>
+              </select>
+            </div>
+            <footer className="ds-modal__footer">
+              <button
+                type="button"
+                className="ds-btn ds-btn--secondary"
+                onClick={() => setEditingCaja(null)}
+                disabled={savingCaja}
+              >
+                {t('Cancelar')}
+              </button>
+              <button type="submit" className="ds-btn ds-btn--primary" disabled={savingCaja}>
+                {savingCaja ? t('Guardando…') : t('Guardar cambios')}
+              </button>
+            </footer>
+          </form>
+        </Modal>
+      )}
+
+      {deletingCaja && (
+        <Modal title={t('Desactivar cuenta')} onClose={() => setDeletingCaja(null)}>
+          <div className="ds-modal__body ds-stack-3">
+            {actionError && (
+              <div className="ds-alert ds-alert--danger">
+                <div className="ds-alert__body">
+                  <p>{actionError}</p>
+                </div>
+              </div>
+            )}
+            <p className="ds-body">
+              {t('¿Seguro que querés desactivar la cuenta "{nombre}"?', { nombre: deletingCaja.nombre })}
+            </p>
+            <p className="ds-help">
+              {t('La cuenta quedará oculta para nuevas operaciones, pero se conservan todos sus movimientos históricos.')}
+            </p>
+            <footer className="ds-modal__footer">
+              <button
+                type="button"
+                className="ds-btn ds-btn--secondary"
+                onClick={() => setDeletingCaja(null)}
+                disabled={savingCaja}
+              >
+                {t('Cancelar')}
+              </button>
+              <button
+                type="button"
+                className="ds-btn ds-btn--danger"
+                onClick={() => void handleDeleteCaja()}
+                disabled={savingCaja}
+              >
+                {savingCaja ? t('Desactivando…') : t('Desactivar')}
+              </button>
+            </footer>
+          </div>
+        </Modal>
       )}
     </>
   );

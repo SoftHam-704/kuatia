@@ -99,4 +99,47 @@ router.post('/transferencias', authenticate, async (request,response)=>{
   } catch(error){response.status(400).json({message:error instanceof z.ZodError?'Datos de transferencia inválidos.':(error as Error).message});}
 });
 
+router.put('/cajas/:id', authenticate, async (request, response) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(request.params.id);
+    const updateSchema = z.object({
+      nombre: z.string().trim().min(2).max(100),
+      tipo: z.enum(['caja', 'banco']).optional(),
+    });
+    const input = updateSchema.parse(request.body);
+    const auth = request.auth!;
+    const updated = await withTenantContext({ tenantId: auth.tenantId, userId: auth.tenantUserCode, schema: auth.schema }, async (client) => {
+      const result = await client.query(
+        `UPDATE cajas
+         SET nombre = $3, tipo = COALESCE($4, tipo)
+         WHERE tenant_id = $1 AND id = $2
+         RETURNING id, nombre, tipo, moneda`,
+        [auth.tenantId, id, input.nombre, input.tipo ?? null],
+      );
+      if (!result.rowCount) throw new Error('Caja o banco no encontrado.');
+      return result.rows[0];
+    }, auth.pool);
+    response.json(updated);
+  } catch (error) {
+    response.status(400).json({ message: error instanceof z.ZodError ? 'Datos inválidos.' : (error as Error).message });
+  }
+});
+
+router.delete('/cajas/:id', authenticate, async (request, response) => {
+  try {
+    const id = z.coerce.number().int().positive().parse(request.params.id);
+    const auth = request.auth!;
+    await withTenantContext({ tenantId: auth.tenantId, userId: auth.tenantUserCode, schema: auth.schema }, async (client) => {
+      const result = await client.query(
+        `UPDATE cajas SET activo = FALSE WHERE tenant_id = $1 AND id = $2 RETURNING id`,
+        [auth.tenantId, id],
+      );
+      if (!result.rowCount) throw new Error('Caja o banco no encontrado.');
+    }, auth.pool);
+    response.status(204).send();
+  } catch (error) {
+    response.status(400).json({ message: (error as Error).message || 'No se pudo desactivar la caja.' });
+  }
+});
+
 export default router;
