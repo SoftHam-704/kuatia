@@ -67,13 +67,15 @@ const P = {
 };
 
 export function Cockpit({
-  session, companies, activeId, activeCompany, onRefreshCompanies,
+  session, companies, activeId, activeCompany, onRefreshCompanies, onRegisterOpen, onActiveWindowChange,
 }: {
   session: Session;
   companies: Company[];
   activeId: number | null;
   activeCompany: Company | null;
   onRefreshCompanies: () => void;
+  onRegisterOpen?: (fn: (id: string) => void) => void;
+  onActiveWindowChange?: (id: string | null) => void;
 }) {
   const areaRef = useRef<HTMLDivElement>(null);
   const { t } = useI18n();
@@ -102,6 +104,18 @@ export function Cockpit({
     dispatch({ type: 'open', window: { id, title: modulo.titulo, context: contexto, dirty: false, busy: false, ...g } });
     setLauncher(false);
   }, [contexto]);
+
+  useEffect(() => {
+    if (onRegisterOpen) {
+      onRegisterOpen((id: string) => abrir(id as ModuloId));
+    }
+  }, [onRegisterOpen, abrir]);
+
+  useEffect(() => {
+    if (onActiveWindowChange) {
+      onActiveWindowChange(workspace.activeId);
+    }
+  }, [workspace.activeId, onActiveWindowChange]);
 
   /* Ctrl+M abre o menu (como o TyresControl); Alt+1..9 salta para a janela n. */
   useEffect(() => {

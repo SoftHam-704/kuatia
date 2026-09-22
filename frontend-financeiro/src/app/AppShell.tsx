@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { PanelScreen } from '../screens/PanelScreen';
 import { CuentasScreen } from '../screens/CuentasScreen';
 import { CajasScreen } from '../screens/CajasScreen';
@@ -252,30 +252,110 @@ export function AppShell({ session, onSignOut }: { session: Session; onSignOut: 
     <ConsolidadoScreen token={session.token} />
   );
 
+  const openInCockpitRef = useRef<((id: string) => void) | null>(null);
+  const [activeWindowId, setActiveWindowId] = useState<string | null>('panel');
+
+  function handleNavClick(next: Route) {
+    if (desktop) {
+      if (openInCockpitRef.current) {
+        openInCockpitRef.current(next);
+      }
+    } else {
+      navigateTo(next);
+    }
+  }
+
   if (desktop) {
     return (
-      <div className="ds-cockpit">
-        <header className="ds-topbar">
-          <BrandMark />
-          <span className="ds-sidebar__brand-name" style={{ color: 'var(--text)' }}>Kuatiá</span>
-          <div style={{ width: '18rem', marginLeft: 'var(--sp-4)' }}>
-            <CompanySwitcher companies={companies} activeId={activeId} onChange={selectCompany} />
+      <div className="ds-app" data-collapsed={collapsed ? 'true' : 'false'}>
+        <aside className="ds-sidebar" data-open="true">
+          <div className="ds-sidebar__brand">
+            <BrandMark />
+            <div className="ds-sidebar__brand-text">
+              <span className="ds-sidebar__brand-name">Kuatiá</span>
+              <span className="ds-sidebar__brand-tag">{t('Gestión financiera')}</span>
+            </div>
+            <button
+              type="button"
+              className="ds-sidebar__toggle"
+              onClick={toggleCollapsed}
+              title={collapsed ? t('Expandir el menú') : t('Encoger el menú')}
+              aria-label={collapsed ? t('Expandir el menú') : t('Encoger el menú')}
+              aria-expanded={!collapsed}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="3" y="4" width="18" height="16" rx="2" />
+                <path d="M9 4v16" />
+                <path d={collapsed ? 'M13 9l3 3-3 3' : 'M17 9l-3 3 3 3'} />
+              </svg>
+            </button>
           </div>
-          <div className="ds-topbar__spacer" />
-          <LocaleSwitcher />
-          <span className="ds-badge ds-badge--abierto">{isAdmin ? t('Administrador') : t('Operador')}</span>
-          <button type="button" className="ds-btn ds-btn--secondary ds-btn--sm" onClick={onSignOut}>{t('Salir')}</button>
-        </header>
 
-        <Cockpit
-          session={session}
-          companies={companies}
-          activeId={activeId}
-          activeCompany={active}
-          onRefreshCompanies={() => {
-            void fetchCompanies(session.token).then((rows) => setCompanies(rows.filter((c) => c.activa)));
-          }}
-        />
+          <CompanySwitcher companies={companies} activeId={activeId} onChange={selectCompany} />
+
+          <nav className="ds-nav" aria-label={t('Secciones')}>
+            {ROUTES.filter((item) => !item.adminOnly || isAdmin).map((item) => {
+              const isActive = activeWindowId === item.key;
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  className={`ds-nav__item${isActive ? ' is-active' : ''}`}
+                  aria-current={isActive ? 'page' : undefined}
+                  title={collapsed ? labels[item.key] : undefined}
+                  onClick={() => handleNavClick(item.key)}
+                >
+                  <svg className="ds-nav__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d={ICONS[item.key]} />
+                  </svg>
+                  <span className="ds-nav__label">{labels[item.key]}</span>
+                </button>
+              );
+            })}
+          </nav>
+
+          <div className="ds-sidebar__foot">
+            <div className="ds-userchip">
+              <span className="ds-userchip__avatar" aria-hidden="true">
+                {session.role === 'ADMIN_TENANT' ? 'AD' : 'OP'}
+              </span>
+              <span className="ds-userchip__text">
+                <span className="ds-userchip__name">
+                  {session.role === 'ADMIN_TENANT' ? t('Administrador') : t('Operador')}
+                </span>
+                <span className="ds-userchip__role">{t('Grupo {id}', { id: session.tenantId })}</span>
+              </span>
+            </div>
+          </div>
+        </aside>
+
+        <div className="ds-cockpit" style={{ display: 'grid', gridTemplateRows: 'var(--topbar-h) 1fr', height: '100vh', overflow: 'hidden' }}>
+          <header className="ds-topbar">
+            <span className="ds-sidebar__brand-name" style={{ color: 'var(--text)', fontWeight: 600, fontSize: '15px' }}>
+              {active ? active.nombreFantasia || active.razonSocial : t('Sin empresa seleccionada')}
+            </span>
+            <div className="ds-topbar__spacer" />
+            <LocaleSwitcher />
+            <span className="ds-badge ds-badge--abierto">{isAdmin ? t('Administrador') : t('Operador')}</span>
+            <button type="button" className="ds-btn ds-btn--secondary ds-btn--sm" onClick={onSignOut}>{t('Salir')}</button>
+          </header>
+
+          <Cockpit
+            session={session}
+            companies={companies}
+            activeId={activeId}
+            activeCompany={active}
+            onRefreshCompanies={() => {
+              void fetchCompanies(session.token).then((rows) => setCompanies(rows.filter((c) => c.activa)));
+            }}
+            onRegisterOpen={(fn) => {
+              openInCockpitRef.current = fn;
+            }}
+            onActiveWindowChange={(id) => {
+              setActiveWindowId(id);
+            }}
+          />
+        </div>
       </div>
     );
   }
