@@ -33,6 +33,16 @@
 
 ---
 
+## Resolvidas em 2026-09-22 (Fase 9 — Retomada e Projeção de Fluxo de Caixa)
+
+| ID | Como foi resolvida |
+|---|---|
+| **D-05** | **Git Oficial Ativo e Pareado:** Repositório inicializado em `e:\Sistemas_ia\Financeiro`, `.gitignore` blindado protegendo credenciais e `.env*`, pareado com `https://github.com/SoftHam-704/kuatia.git` (`main`). Espelho local em `T:\Financeiro` preservado. |
+| **B-01 (Fronteira §7)** | **Projeção de Saldo Acumulado no Fluxo de Caixa:** Resolvida a lacuna funcional de liquidez. O backend calcula saldo inicial das caixas/bancos antes de `desde` e projeta o saldo acumulado corrido dia a dia por moeda (PYG/USD/BRL separados). Front-end e exportações (Excel/PDF) atualizados com cartões de saldo inicial e coluna de saldo acumulado. Relatório em `outputs/fases/F9-flujo-caja-saldo-acumulado.md`. |
+| **P-01 (Deprecation)** | **Concorrência de Query no PoolClient:** Resolvido o `DeprecationWarning: Calling client.query() when the client is already executing a query`. Chamadas concorrentes `Promise.all` sobre o mesmo cliente no tenant context foram convertidas para sequenciais. |
+
+---
+
 ## Decisões PENDENTES (bloqueiam a fase indicada)
 
 ### ✅ D-11 — RESOLVIDA em 2026-08-11 · papel `kuatia_adm` criado e provado

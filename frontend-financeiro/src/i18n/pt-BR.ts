@@ -430,6 +430,7 @@ export const PT_BR: Record<string, string> = {
   'A pagar': 'A pagar',
   'Neto proyectado': 'Líquido projetado',
   'Neto': 'Líquido',
+  'Saldo acumulado': 'Saldo acumulado',
 
   /* --- Resultados ------------------------------------------------------------------------- */
   'Resultados gerenciales': 'Resultados gerenciais',

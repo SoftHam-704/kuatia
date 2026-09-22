@@ -7,17 +7,18 @@
 
 | | |
 |---|---|
-| **Fases fechadas** | F0, F1, F2, F3, F5 ✅ · F4 ⚠️ parcial (TLS pendente) |
-| **Fase atual** | — rodada concluída, exceto o bloqueio abaixo |
-| **No Corpus** | `products/kuatia/contexto.md` + `manual/` com **9 capítulos**. `check-corpus.js` sem erros. **Não publicados** — `sync-iris-corpus.js` é do dono (PLY-002). |
-| **Versão do plano** | `v1` (2026-08-11) |
+| **Fases fechadas** | F0, F1, F2, F3, F5, F6, F7, F8, F9 ✅ · F4 ⚠️ parcial (TLS pendente) |
+| **Fase atual** | — F9 concluída (Fluxo de caixa com saldo inicial e acumulado) |
+| **No Corpus** | `products/kuatia/contexto.md` + `manual/` com **9 capítulos** (atualizados em F9 com a projeção de saldo). `check-corpus.js` sem erros. |
+| **Versão do plano** | `v1` (2026-08-11) · F9 (2026-09-22) |
 | **RLS** | ✅ Ativo desde 2026-08-11. O app conecta como `kuatia_adm` (`NOSUPERUSER NOBYPASSRLS`); teste de vazamento com tenant inexistente devolve 0 linhas. |
 | **Schema** | ✅ Dados do tenant em `pinheirao`; `public` só com o comum. Ver [`outputs/fases/F6-schema-do-tenant.md`](outputs/fases/F6-schema-do-tenant.md). |
 | **Provisionamento** | ✅ `npm run migrate:tenant -- <schema>`. Provado criando um tenant do zero e comparando objeto a objeto com o Pinheirão. Ver [`F7`](outputs/fases/F7-provisionamento-de-tenant.md). |
-| **Aberto** | L-05 (pools × Pgpool) · L-06 (nó fixo em vez do Pgpool) · D-09 (TLS) · troca do `JWT_SECRET` |
-| **Repositório** | `T:\Financeiro` (espelho) até existir git |
+| **Fluxo de Caixa** | ✅ Projeção com saldo inicial e acumulado por moeda. Ver [`F9`](outputs/fases/F9-flujo-caja-saldo-acumulado.md). |
+| **Aberto** | L-05 (pools × Pgpool) · L-06 (nó fixo em vez do Pgpool) · D-09 (TLS) · D-12 (`bloqueio_ativo` no master) |
+| **Repositório** | Git ativo e pareado: `https://github.com/SoftHam-704/kuatia.git` (`main`) |
 
-Relatório das fases executadas: [`outputs/fases/F0-F4-relatorio.md`](outputs/fases/F0-F4-relatorio.md)
+Relatório das fases executadas: [`outputs/fases/F0-F4-relatorio.md`](outputs/fases/F0-F4-relatorio.md) · [`outputs/fases/F9-flujo-caja-saldo-acumulado.md`](outputs/fases/F9-flujo-caja-saldo-acumulado.md)
 
 ## Onde paramos — 2026-08-11, fim do dia
 

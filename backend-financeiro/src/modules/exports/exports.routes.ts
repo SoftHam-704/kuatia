@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { withTenantContext } from '../../config/database.js';
 import { authenticate } from '../../middleware/auth.js';
 import { companyDashboard } from '../reports/reports.routes.js';
+import { projectCashflow, type CashflowEventInput, type CashflowInitialBalance } from '../../domain/cashflow.js';
 
 const router = Router();
 const querySchema = z.object({
@@ -182,9 +183,82 @@ router.get('/reportes', authenticate, async (request, response) => {
     if ((input.tipo === 'FLUJO' || input.tipo === 'RESULTADOS') && (!input.empresaId || !input.desde || !input.hasta)) throw new Error('Empresa y período son obligatorios.'); if (input.desde && input.hasta && input.hasta < input.desde) throw new Error('La fecha final debe ser igual o posterior a la inicial.'); const auth = request.auth!; if (input.tipo === 'CONSOLIDADO' && auth.role !== 'ADMIN_TENANT') throw new Error('El consolidado requiere perfil administrador.');
     const report = await withTenantContext({ tenantId: auth.tenantId, userId: auth.tenantUserCode, schema: auth.schema }, async (client): Promise<ReportTable> => {
       if (input.tipo === 'FLUJO') {
-        const company = await client.query('SELECT razon_social FROM empresas WHERE tenant_id=$1 AND id=$2 AND activa=TRUE', [auth.tenantId, input.empresaId]); if (!company.rowCount) throw new Error('Empresa no encontrada o sin acceso.');
-        const data = await client.query(`WITH eventos AS (SELECT cp.moneda,q.fecha_vencimiento AS fecha,'PAGAR' AS tipo,SUM(q.valor_minor-COALESCE(b.aplicado_minor,0)) AS valor_minor FROM cuentas_pagar cp JOIN cuotas_pagar q ON q.tenant_id=cp.tenant_id AND q.cuenta_pagar_id=cp.id LEFT JOIN LATERAL (SELECT SUM(CASE WHEN tipo='BAJA' THEN valor_pagado_minor+descuento_minor ELSE -(valor_pagado_minor+descuento_minor) END) AS aplicado_minor FROM bajas_pagar WHERE tenant_id=q.tenant_id AND cuota_id=q.id)b ON TRUE WHERE cp.tenant_id=$1 AND cp.empresa_id=$2 AND q.fecha_vencimiento BETWEEN $3 AND $4 GROUP BY cp.moneda,q.fecha_vencimiento UNION ALL SELECT cc.moneda,q.fecha_vencimiento,'COBRAR',SUM(q.valor_minor-COALESCE(b.aplicado_minor,0)) FROM cuentas_cobrar cc JOIN cuotas_cobrar q ON q.tenant_id=cc.tenant_id AND q.cuenta_cobrar_id=cc.id LEFT JOIN LATERAL (SELECT SUM(CASE WHEN tipo='BAJA' THEN valor_cobrado_minor+descuento_minor ELSE -(valor_cobrado_minor+descuento_minor) END) AS aplicado_minor FROM bajas_cobrar WHERE tenant_id=q.tenant_id AND cuota_id=q.id)b ON TRUE WHERE cc.tenant_id=$1 AND cc.empresa_id=$2 AND q.fecha_vencimiento BETWEEN $3 AND $4 GROUP BY cc.moneda,q.fecha_vencimiento) SELECT fecha::TEXT,moneda,COALESCE(SUM(valor_minor) FILTER(WHERE tipo='COBRAR'),0)::TEXT AS cobrar_minor,COALESCE(SUM(valor_minor) FILTER(WHERE tipo='PAGAR'),0)::TEXT AS pagar_minor FROM eventos GROUP BY fecha,moneda ORDER BY fecha,moneda`, [auth.tenantId, input.empresaId, input.desde, input.hasta]);
-        return { title: 'Flujo de Caja', subtitle: `${company.rows[0].razon_social} · ${formatDate(input.desde!)} al ${formatDate(input.hasta!)} · monedas separadas`, headers: ['Fecha', 'Moneda', 'A cobrar', 'A pagar', 'Neto'], rows: data.rows.map((row) => [formatDate(row.fecha), row.moneda, formatMoney(row.cobrar_minor, row.moneda), formatMoney(row.pagar_minor, row.moneda), formatMoney((BigInt(row.cobrar_minor) - BigInt(row.pagar_minor)).toString(), row.moneda)]) };
+        const company = await client.query('SELECT razon_social FROM empresas WHERE tenant_id=$1 AND id=$2 AND activa=TRUE', [auth.tenantId, input.empresaId]);
+        if (!company.rowCount) throw new Error('Empresa no encontrada o sin acceso.');
+
+        const initialRes = await client.query(
+          `WITH saldos_caja AS (
+             SELECT c.moneda,
+                    c.saldo_inicial_minor + COALESCE(SUM(
+                      CASE WHEN m.tipo = 'C' THEN m.valor_minor ELSE -m.valor_minor END
+                    ) FILTER (WHERE m.fecha < $3 AND m.fecha >= c.fecha_saldo_inicial), 0) AS saldo_caja_minor
+             FROM cajas c
+             LEFT JOIN movimientos_caja m ON m.tenant_id = c.tenant_id AND m.caja_id = c.id
+             WHERE c.tenant_id = $1 AND c.empresa_id = $2 AND c.activo = TRUE
+             GROUP BY c.id, c.moneda, c.saldo_inicial_minor
+           )
+           SELECT moneda, SUM(saldo_caja_minor)::TEXT AS saldo_inicial_minor
+           FROM saldos_caja
+           GROUP BY moneda
+           ORDER BY moneda`,
+          [auth.tenantId, input.empresaId, input.desde],
+        );
+
+        const eventsRes = await client.query(
+          `WITH eventos AS (
+             SELECT cp.moneda, q.fecha_vencimiento AS fecha, 'PAGAR' AS tipo,
+                    SUM(q.valor_minor - COALESCE(b.aplicado_minor, 0)) AS valor_minor
+             FROM cuentas_pagar cp
+             JOIN cuotas_pagar q ON q.tenant_id = cp.tenant_id AND q.cuenta_pagar_id = cp.id
+             LEFT JOIN LATERAL (
+               SELECT SUM(CASE WHEN tipo = 'BAJA' THEN valor_pagado_minor + descuento_minor ELSE -(valor_pagado_minor + descuento_minor) END) AS aplicado_minor
+               FROM bajas_pagar WHERE tenant_id = q.tenant_id AND cuota_id = q.id
+             ) b ON TRUE
+             WHERE cp.tenant_id = $1 AND cp.empresa_id = $2 AND cp.estado <> 'CANCELADO' AND q.estado <> 'CANCELADO'
+               AND q.fecha_vencimiento BETWEEN $3 AND $4
+               AND (q.valor_minor - COALESCE(b.aplicado_minor, 0)) > 0
+             GROUP BY cp.moneda, q.fecha_vencimiento
+             UNION ALL
+             SELECT cc.moneda, q.fecha_vencimiento, 'COBRAR',
+                    SUM(q.valor_minor - COALESCE(b.aplicado_minor, 0))
+             FROM cuentas_cobrar cc
+             JOIN cuotas_cobrar q ON q.tenant_id = cc.tenant_id AND q.cuenta_cobrar_id = cc.id
+             LEFT JOIN LATERAL (
+               SELECT SUM(CASE WHEN tipo = 'BAJA' THEN valor_cobrado_minor + descuento_minor ELSE -(valor_cobrado_minor + descuento_minor) END) AS aplicado_minor
+               FROM bajas_cobrar WHERE tenant_id = q.tenant_id AND cuota_id = q.id
+             ) b ON TRUE
+             WHERE cc.tenant_id = $1 AND cc.empresa_id = $2 AND cc.estado <> 'CANCELADO' AND q.estado <> 'CANCELADO'
+               AND q.fecha_vencimiento BETWEEN $3 AND $4
+               AND (q.valor_minor - COALESCE(b.aplicado_minor, 0)) > 0
+             GROUP BY cc.moneda, q.fecha_vencimiento
+           )
+           SELECT fecha::TEXT, moneda,
+                  COALESCE(SUM(valor_minor) FILTER (WHERE tipo = 'COBRAR'), 0)::TEXT AS cobrar_minor,
+                  COALESCE(SUM(valor_minor) FILTER (WHERE tipo = 'PAGAR'), 0)::TEXT AS pagar_minor
+           FROM eventos
+           GROUP BY fecha, moneda
+           ORDER BY fecha ASC, moneda ASC`,
+          [auth.tenantId, input.empresaId, input.desde, input.hasta],
+        );
+
+        const projected = projectCashflow(initialRes.rows as CashflowInitialBalance[], eventsRes.rows as CashflowEventInput[]);
+        const initialText = projected.saldosIniciales.length
+          ? ' · Saldo inicial: ' + projected.saldosIniciales.map((s) => formatMoney(s.saldo_inicial_minor, s.moneda as Currency)).join(' | ')
+          : '';
+
+        return {
+          title: 'Flujo de Caja',
+          subtitle: `${company.rows[0].razon_social} · ${formatDate(input.desde!)} al ${formatDate(input.hasta!)}${initialText}`,
+          headers: ['Fecha', 'Moneda', 'A cobrar', 'A pagar', 'Neto', 'Saldo acumulado'],
+          rows: projected.rows.map((row) => [
+            formatDate(row.fecha),
+            row.moneda,
+            formatMoney(row.cobrar_minor, row.moneda as Currency),
+            formatMoney(row.pagar_minor, row.moneda as Currency),
+            formatMoney(row.neto_minor, row.moneda as Currency),
+            formatMoney(row.saldo_acumulado_minor, row.moneda as Currency),
+          ]),
+        };
       }
       if (input.tipo === 'RESULTADOS') {
         const company = await client.query('SELECT razon_social FROM empresas WHERE tenant_id=$1 AND id=$2 AND activa=TRUE', [auth.tenantId, input.empresaId]); if (!company.rowCount) throw new Error('Empresa no encontrada o sin acceso.');
