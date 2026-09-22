@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="es-PY" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Marca · 3 conceptos de logotipo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../../frontend-financeiro/src/design-system/tokens.css" />
+<link rel="stylesheet" href="../../frontend-financeiro/src/design-system/components.css" />
+<style>
+  .wrap { max-width: 1100px; margin: 0 auto; padding: var(--sp-10) var(--sp-5) var(--sp-16); display: grid; gap: var(--sp-8); }
+  .concept { display: grid; gap: var(--sp-5); }
+  .concept > header { display: grid; gap: var(--sp-2); border-top: 2px solid var(--border); padding-top: var(--sp-4); }
+  .eyebrow { font-size: var(--fs-2xs); font-weight: 700; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--accent); }
+  .note { font-size: var(--fs-sm); color: var(--text-secondary); max-width: 74ch; }
+  .canvas { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--sp-4); }
+  .plate { display: grid; gap: var(--sp-4); place-items: center; padding: var(--sp-6); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-surface); }
+  .plate--dark { background: var(--blue-950); border-color: var(--blue-900); color: #fff; }
+  .plate--mono { filter: grayscale(1) contrast(1.15); }
+  .plate__label { font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: var(--tracking-caps); color: var(--text-muted); }
+  .plate--dark .plate__label { color: rgb(255 255 255 / 0.6); }
+  .sizes { display: flex; align-items: flex-end; gap: var(--sp-5); flex-wrap: wrap; }
+  .size { display: grid; gap: var(--sp-2); justify-items: center; font-size: var(--fs-2xs); color: var(--text-muted); }
+  .app-bar { display: flex; align-items: center; gap: var(--sp-2); background: var(--sidebar-bg); color: #fff; padding: var(--sp-3) var(--sp-4); border-radius: var(--radius-md); font-weight: 600; }
+  .pros { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--sp-4); }
+  .pros > div { padding: var(--sp-4); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-surface); display: grid; gap: var(--sp-2); font-size: var(--fs-sm); }
+  .pros h4 { margin: 0; font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: var(--tracking-caps); }
+  .pros .ok h4 { color: var(--positive); }
+  .pros .risk h4 { color: var(--warning-strong); }
+  .pros .use h4 { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="ds-stack-2">
+    <span class="eyebrow">Identidad</span>
+    <h1 class="ds-title">Tres conceptos de logotipo</h1>
+    <p class="note">
+      Los tres nacen del mismo sistema: azul tinta (confianza, extrato bancario), oro guaraní (el acento que
+      señala lo importante) y geometría simple que sobrevive a 16 px. Los tres nombres están en guaraní —
+      corto, pronunciable en castellano, y de un país que el cliente reconoce como propio.
+    </p>
+  </header>
+
+  <!-- ============ A · KUATIÁ ============ -->
+  <section class="concept">
+    <header>
+      <span class="eyebrow">Concepto A</span>
+      <h2 class="ds-subtitle">Kuatiá — «el papel», el registro</h2>
+      <p class="note">
+        <strong>Idea:</strong> el símbolo ₲ construido como un sello de registro. El trazo dorado vertical es a la vez
+        la barra del guaraní y el lomo del libro contable: lo que antes vivía en una hoja suelta ahora tiene lomo,
+        orden y memoria. <strong>Tono:</strong> institucional, sobrio, bancario. Es el más conservador de los tres y el
+        que mejor le habla a un contador.
+      </p>
+    </header>
+
+    <div class="canvas">
+      <div class="plate">
+        <span class="plate__label">Lockup horizontal</span>
+        <img src="logo-a-kuatia-lockup.svg" alt="Kuatiá lockup" width="380" />
+      </div>
+      <div class="plate plate--dark">
+        <span class="plate__label">Sobre fondo oscuro</span>
+        <img src="logo-a-kuatia-mark.svg" alt="Kuatiá marca" width="96" />
+        <div class="app-bar" style="background:rgba(255,255,255,.08)">
+          <img src="logo-a-kuatia-mark.svg" alt="" width="26" /> Kuatiá
+        </div>
+      </div>
+      <div class="plate plate--mono">
+        <span class="plate__label">Monocromo · fax, sello, factura</span>
+        <img src="logo-a-kuatia-mark.svg" alt="Kuatiá monocromo" width="96" />
+      </div>
+    </div>
+
+    <div class="plate" style="justify-items:start">
+      <span class="plate__label">Prueba de reducción</span>
+      <div class="sizes">
+        <div class="size"><img src="logo-a-kuatia-mark.svg" width="96" alt="" />96 px</div>
+        <div class="size"><img src="logo-a-kuatia-mark.svg" width="48" alt="" />48 px</div>
+        <div class="size"><img src="logo-a-kuatia-mark.svg" width="32" alt="" />32 px</div>
+        <div class="size"><img src="logo-a-kuatia-mark.svg" width="24" alt="" />24 px</div>
+        <div class="size"><img src="logo-a-kuatia-mark.svg" width="16" alt="" />16 px · favicon</div>
+      </div>
+    </div>
+
+    <div class="pros">
+      <div class="ok"><h4>Fuerte en</h4><p>Reconocimiento inmediato de «dinero paraguayo». Funciona en blanco y negro, en un sello y en una factura impresa.</p></div>
+      <div class="risk"><h4>Riesgo</h4><p>El símbolo ₲ es de uso público: hay que cuidar que el trazo dorado sea distintivo, o se parece a cualquier ícono de moneda.</p></div>
+      <div class="use"><h4>Elegir si</h4><p>El producto se vende como sistema serio de gestión para el grupo, y el interlocutor es el dueño o el contador.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ B · ATY ============ -->
+  <section class="concept">
+    <header>
+      <span class="eyebrow">Concepto B</span>
+      <h2 class="ds-subtitle">Aty — «la reunión», el grupo</h2>
+      <p class="note">
+        <strong>Idea:</strong> cinco barras, cinco empresas, apoyadas en una misma base. La cuarta, en oro, es la que
+        se está mirando: la marca cambia de acento según la empresa activa, y las cinco juntas son el consolidado.
+        <strong>Tono:</strong> claro, moderno, de dato. Es el único de los tres que dice «grupo» sin explicarlo.
+      </p>
+    </header>
+
+    <div class="canvas">
+      <div class="plate">
+        <span class="plate__label">Lockup horizontal</span>
+        <img src="logo-b-aty-lockup.svg" alt="Aty lockup" width="380" />
+      </div>
+      <div class="plate plate--dark">
+        <span class="plate__label">Sobre fondo oscuro</span>
+        <img src="logo-b-aty-mark.svg" alt="Aty marca" width="96" />
+        <div class="app-bar" style="background:rgba(255,255,255,.08)">
+          <img src="logo-b-aty-mark.svg" alt="" width="26" /> Aty
+        </div>
+      </div>
+      <div class="plate plate--mono">
+        <span class="plate__label">Monocromo</span>
+        <img src="logo-b-aty-mark.svg" alt="Aty monocromo" width="96" />
+      </div>
+    </div>
+
+    <div class="plate" style="justify-items:start">
+      <span class="plate__label">Prueba de reducción</span>
+      <div class="sizes">
+        <div class="size"><img src="logo-b-aty-mark.svg" width="96" alt="" />96 px</div>
+        <div class="size"><img src="logo-b-aty-mark.svg" width="48" alt="" />48 px</div>
+        <div class="size"><img src="logo-b-aty-mark.svg" width="32" alt="" />32 px</div>
+        <div class="size"><img src="logo-b-aty-mark.svg" width="24" alt="" />24 px</div>
+        <div class="size"><img src="logo-b-aty-mark.svg" width="16" alt="" />16 px · favicon</div>
+      </div>
+    </div>
+
+    <div class="pros">
+      <div class="ok"><h4>Fuerte en</h4><p>Cuenta la promesa central —ver las cinco empresas juntas— sin una sola palabra. Escala bien y se anima con naturalidad.</p></div>
+      <div class="risk"><h4>Riesgo</h4><p>El gráfico de barras es territorio común de todo software de dashboards; la diferenciación depende del color y del ritmo de las alturas.</p></div>
+      <div class="use"><h4>Elegir si</h4><p>El valor que se quiere vender es la visión consolidada del grupo, y el producto puede crecer hacia otros clientes multiempresa.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ C · SYRY ============ -->
+  <section class="concept">
+    <header>
+      <span class="eyebrow">Concepto C</span>
+      <h2 class="ds-subtitle">Syry — «fluir», el flujo de caja</h2>
+      <p class="note">
+        <strong>Idea:</strong> la corriente del dinero subiendo. El trazo grueso es el flujo proyectado; la línea tenue
+        de atrás es lo que ya pasó, la historia que hoy vive en papel. El punto dorado es el saldo al que se llega:
+        el número que el dueño busca cada mañana. <strong>Tono:</strong> ligero, cercano, menos «sistema» y más
+        herramienta diaria.
+      </p>
+    </header>
+
+    <div class="canvas">
+      <div class="plate">
+        <span class="plate__label">Lockup horizontal</span>
+        <img src="logo-c-syry-lockup.svg" alt="Syry lockup" width="380" />
+      </div>
+      <div class="plate plate--dark">
+        <span class="plate__label">Sobre fondo oscuro</span>
+        <img src="logo-c-syry-mark.svg" alt="Syry marca" width="96" />
+        <div class="app-bar" style="background:rgba(255,255,255,.08)">
+          <img src="logo-c-syry-mark.svg" alt="" width="26" /> Syry
+        </div>
+      </div>
+      <div class="plate plate--mono">
+        <span class="plate__label">Monocromo</span>
+        <img src="logo-c-syry-mark.svg" alt="Syry monocromo" width="96" />
+      </div>
+    </div>
+
+    <div class="plate" style="justify-items:start">
+      <span class="plate__label">Prueba de reducción</span>
+      <div class="sizes">
+        <div class="size"><img src="logo-c-syry-mark.svg" width="96" alt="" />96 px</div>
+        <div class="size"><img src="logo-c-syry-mark.svg" width="48" alt="" />48 px</div>
+        <div class="size"><img src="logo-c-syry-mark.svg" width="32" alt="" />32 px</div>
+        <div class="size"><img src="logo-c-syry-mark.svg" width="24" alt="" />24 px</div>
+        <div class="size"><img src="logo-c-syry-mark.svg" width="16" alt="" />16 px · favicon</div>
+      </div>
+    </div>
+
+    <div class="pros">
+      <div class="ok"><h4>Fuerte en</h4><p>Es el más amable de los tres: nombra el beneficio (el dinero fluye y se ve) en vez del artefacto.</p></div>
+      <div class="risk"><h4>Riesgo</h4><p>La línea ascendente es lugar común del software financiero. La diferencia está en el trazo grueso, la corriente de fondo y el punto dorado — y en que promete subida, cuando no toda semana sube.</p></div>
+      <div class="use"><h4>Elegir si</h4><p>La prioridad es que la gente que viene del papel sienta el producto liviano y no intimidante.</p></div>
+    </div>
+  </section>
+
+  <section class="concept">
+    <header>
+      <span class="eyebrow">Notas de producción</span>
+      <h2 class="ds-subtitle">Antes de fijar la marca</h2>
+    </header>
+    <div class="ds-card"><div class="ds-card__body ds-stack-2 ds-body">
+      <p>· Los textos de los lockups usan Inter. En la versión final hay que convertirlos a trazos (outlines) para no depender de la fuente instalada.</p>
+      <p>· Área de protección: media altura del ícono en los cuatro lados. Tamaño mínimo del lockup: 120 px de ancho.</p>
+      <p>· Verificar disponibilidad del nombre en la SET y en dominios .com.py antes de decidir.</p>
+      <p>· El acento dorado nunca se usa en la interfaz para representar dinero: es color de marca, no de valor.</p>
+    </div></div>
+  </section>
+
+</div>
+</body>
+</html>

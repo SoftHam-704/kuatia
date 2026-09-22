@@ -1,0 +1,38 @@
+# Environment & Secrets (CRÍTICO: nunca comitar credenciais nem chaves)
+.env
+.env.*
+*.env
+*.env.*
+*.original
+war-game/checkpoints/
+checkpoints/
+
+# Node & Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build Outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Temporary Files & Previews
+tmp/
+backend-financeiro/tmp/
+*.tmp
+*.log
+_tmp*
+
+# AI & IDE Metadata
+.claude/
+.workbuddy-ai/
+.vscode/
+.idea/
+
+# OS Specific
+.DS_Store
+Thumbs.db
+Desktop.ini

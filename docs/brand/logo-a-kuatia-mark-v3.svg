@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Kuatia">
+  <title>Kuatia — livro de registro</title>
+  <rect width="512" height="512" rx="112" fill="#0c2a45"/>
+  <path d="M158 92H300L370 162V388C370 408 354 424 334 424H158C138 424 122 408 122 388V128C122 108 138 92 158 92Z" fill="#f4f7fa"/>
+  <path d="M300 92V140C300 152 310 162 322 162H370" fill="none" stroke="#bed6ea" stroke-width="22" stroke-linejoin="round"/>
+  <path d="M160 138V378" fill="none" stroke="#d7a53c" stroke-width="26" stroke-linecap="round"/>
+  <path d="M211 205H322M211 258H322M211 311H282" fill="none" stroke="#17496f" stroke-width="28" stroke-linecap="round"/>
+  <circle cx="311" cy="311" r="24" fill="#d7a53c"/>
+</svg>

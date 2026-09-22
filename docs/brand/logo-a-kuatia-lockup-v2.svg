@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" width="800" height="200" role="img" aria-label="Kuatiá · Finanzas del Grupo">
+  <title>Kuatiá — lockup horizontal reforçado</title>
+  <g transform="translate(0,28) scale(.28125)">
+    <rect width="512" height="512" rx="112" fill="#0c2a45"/>
+    <rect x="28" y="28" width="456" height="456" rx="88" fill="none" stroke="#d7a53c" stroke-width="12"/>
+    <path d="M363 339A132 132 0 1 1 363 173" fill="none" stroke="#ffffff" stroke-width="48" stroke-linecap="round"/>
+    <path d="M251 258H390" fill="none" stroke="#ffffff" stroke-width="48" stroke-linecap="round"/>
+    <path d="M185 126V386" fill="none" stroke="#d7a53c" stroke-width="34" stroke-linecap="round"/>
+    <circle cx="185" cy="104" r="15" fill="#d7a53c"/>
+    <circle cx="185" cy="408" r="15" fill="#d7a53c"/>
+  </g>
+  <text x="178" y="108" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="80" font-weight="800" letter-spacing="-2.5" fill="#0c2a45">Kuatiá</text>
+  <rect x="181" y="127" width="42" height="5" rx="2.5" fill="#d7a53c"/>
+  <text x="235" y="135" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="19" font-weight="700" letter-spacing="3.1" fill="#414d59">FINANZAS DEL GRUPO</text>
+</svg>

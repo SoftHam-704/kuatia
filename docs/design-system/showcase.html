@@ -1,0 +1,882 @@
+<!doctype html>
+<html lang="es-PY" data-theme="light" data-density="comfortable">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Design System · Finanzas del Grupo (Paraguay)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../../frontend-financeiro/src/design-system/tokens.css" />
+<link rel="stylesheet" href="../../frontend-financeiro/src/design-system/components.css" />
+<style>
+  /* Estilos exclusivos desta página de demonstração (não fazem parte do DS). */
+  .demo-section { display: grid; gap: var(--sp-4); scroll-margin-top: 80px; }
+  .demo-section > header { display: grid; gap: var(--sp-1); padding-top: var(--sp-4); border-top: 2px solid var(--border); }
+  .demo-eyebrow { font-size: var(--fs-2xs); font-weight: 700; letter-spacing: var(--tracking-caps); text-transform: uppercase; color: var(--accent); }
+  .demo-note { font-size: var(--fs-sm); color: var(--text-secondary); max-width: 72ch; }
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: var(--sp-3); }
+  .swatch { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; background: var(--bg-surface); }
+  .swatch__chip { height: 56px; }
+  .swatch__meta { padding: var(--sp-2) var(--sp-3); display: grid; gap: 2px; }
+  .swatch__name { font-size: var(--fs-xs); font-weight: 600; }
+  .swatch__val { font-size: var(--fs-2xs); color: var(--text-muted); font-family: var(--font-mono); }
+  .spec { display: grid; grid-template-columns: 1fr; gap: var(--sp-2); }
+  .spec__row { display: flex; align-items: baseline; gap: var(--sp-4); padding-bottom: var(--sp-2); border-bottom: 1px dashed var(--border); }
+  .spec__key { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-muted); min-width: 200px; }
+  .demo-tiles { display: flex; flex-wrap: wrap; gap: var(--sp-4); align-items: flex-end; }
+  .tile { display: grid; gap: var(--sp-2); justify-items: center; font-size: var(--fs-2xs); color: var(--text-muted); }
+  .tile__box { background: var(--accent-subtle); border: 1px solid var(--accent-border); }
+  .demo-do { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--sp-4); }
+  .demo-do > div { padding: var(--sp-4); border-radius: var(--radius-lg); border: 1px solid var(--border); background: var(--bg-surface); display: grid; gap: var(--sp-2); }
+  .demo-do__yes { border-left: 3px solid var(--positive); }
+  .demo-do__no { border-left: 3px solid var(--negative); }
+  .demo-do h4 { margin: 0; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: var(--tracking-caps); }
+  .demo-do__yes h4 { color: var(--positive); }
+  .demo-do__no h4 { color: var(--negative); }
+  .demo-toc { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+  .demo-toc a { font-size: var(--fs-sm); padding: 4px 10px; border-radius: var(--radius-pill); border: 1px solid var(--border); color: var(--text-secondary); }
+  .demo-toc a:hover { background: var(--bg-hover); text-decoration: none; color: var(--text); }
+  code { font-family: var(--font-mono); font-size: 0.9em; background: var(--bg-sunken); padding: 1px 5px; border-radius: var(--radius-xs); }
+</style>
+</head>
+<body>
+
+<div class="ds-app">
+
+  <!-- ======================= SIDEBAR ======================= -->
+  <aside class="ds-sidebar" id="sidebar">
+    <div class="ds-sidebar__brand">
+      <svg width="30" height="30" viewBox="0 0 512 512" aria-hidden="true">
+        <rect width="512" height="512" rx="116" fill="#123a5c"/>
+        <path d="M377 312A112 112 0 1 1 377 200" fill="none" stroke="#fff" stroke-width="42" stroke-linecap="round"/>
+        <rect x="288" y="235" width="112" height="42" rx="21" fill="#fff"/>
+        <rect x="192" y="112" width="36" height="288" rx="18" fill="#c8961e"/>
+      </svg>
+      <span class="ds-sidebar__brand-name">Kuatiá</span>
+    </div>
+
+    <button class="ds-company" type="button">
+      <span class="ds-company__avatar">AG</span>
+      <span class="ds-company__text">
+        <span class="ds-company__label">Empresa activa</span>
+        <span class="ds-company__name">Agroservicios del Este S.A.</span>
+      </span>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" style="margin-left:auto;flex:none"><path d="m4 6.5 4 4 4-4"/></svg>
+    </button>
+
+    <nav class="ds-nav" aria-label="Navegación principal">
+      <a class="ds-nav__item" href="#panel" aria-current="page">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Panel
+      </a>
+      <div class="ds-nav__group">Operación</div>
+      <a class="ds-nav__item" href="#pagar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v6h6M9 14h6M9 18h4"/></svg>
+        Cuentas por Pagar
+        <span class="ds-nav__badge">7</span>
+      </a>
+      <a class="ds-nav__item" href="#pagar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v6h6M9 15l2.5 2.5L16 13"/></svg>
+        Cuentas por Cobrar
+      </a>
+      <a class="ds-nav__item" href="#libro">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="13" rx="2"/><path d="M2.5 10.5h19M7 15h4"/></svg>
+        Libro de Caja
+      </a>
+      <a class="ds-nav__item" href="#panel">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17.5 9 11l4 4 8-8.5"/><path d="M15 6.5h6v6"/></svg>
+        Flujo de Caja
+      </a>
+      <div class="ds-nav__group">Grupo</div>
+      <a class="ds-nav__item" href="#consolidado">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V9l6-4 6 4v12"/><path d="M2 21h20M9 21v-5h4v5"/><path d="M20 21V12l-4-3"/></svg>
+        Panel Consolidado
+      </a>
+      <div class="ds-nav__group">Sistema</div>
+      <a class="ds-nav__item" href="#fundamentos">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/></svg>
+        Design System
+      </a>
+    </nav>
+  </aside>
+
+  <!-- ======================= MAIN ======================= -->
+  <div class="ds-main">
+    <header class="ds-topbar">
+      <button class="ds-btn ds-btn--ghost ds-btn--icon" id="menu" aria-label="Abrir menú">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <span class="ds-overline">Design System v1.0</span>
+      <div class="ds-topbar__spacer"></div>
+      <div class="ds-btn-group" role="group" aria-label="Densidad">
+        <button class="ds-btn ds-btn--secondary ds-btn--sm" data-density-set="comfortable" aria-pressed="true">Cómoda</button>
+        <button class="ds-btn ds-btn--secondary ds-btn--sm" data-density-set="compact" aria-pressed="false">Compacta</button>
+      </div>
+      <button class="ds-btn ds-btn--secondary ds-btn--sm" id="theme">Modo oscuro</button>
+    </header>
+
+    <main class="ds-content">
+
+      <div class="ds-page-header">
+        <div class="ds-page-header__text">
+          <span class="demo-eyebrow">Sistema de diseño</span>
+          <h1 class="ds-title">Finanzas del Grupo · Paraguay</h1>
+          <p class="demo-note">
+            Un sistema construido alrededor de una sola idea: <strong>el número manda</strong>. Todo lo demás
+            —color, sombra, movimiento— existe para que el guaraní se lea sin dudar, en el escritorio y en el celular.
+          </p>
+        </div>
+      </div>
+
+      <nav class="demo-toc" aria-label="Secciones">
+        <a href="#panel">Panel</a>
+        <a href="#pagar">Cuentas por Pagar</a>
+        <a href="#baja">Baja y reversión</a>
+        <a href="#consolidado">Consolidado</a>
+        <a href="#fundamentos">Color</a>
+        <a href="#tipografia">Tipografía y dinero</a>
+        <a href="#espacio">Espacio y forma</a>
+        <a href="#componentes">Componentes</a>
+        <a href="#reglas">Reglas</a>
+      </nav>
+
+      <!-- ============ 1 · PANEL DE LA EMPRESA ============ -->
+      <section class="demo-section" id="panel">
+        <header>
+          <span class="demo-eyebrow">Pantalla 01</span>
+          <h2 class="ds-subtitle">Panel de la empresa</h2>
+          <p class="demo-note">Responde en tres segundos: cuánto hay, qué vence, qué está atrasado. Cada número dice de cuándo es.</p>
+        </header>
+
+        <div class="ds-row">
+          <span class="ds-asof">Datos al 09/03/2026, 08:12</span>
+          <span class="ds-help">Moneda funcional: <span class="ds-cur ds-cur--pyg">₲ PYG</span></span>
+          <div class="ds-push ds-row ds-row--tight">
+            <button class="ds-btn ds-btn--secondary ds-btn--sm">Exportar a Excel</button>
+            <button class="ds-btn ds-btn--primary ds-btn--sm">Nuevo movimiento</button>
+          </div>
+        </div>
+
+        <div class="ds-kpi-grid">
+          <div class="ds-kpi ds-kpi--accent">
+            <span class="ds-kpi__label">Saldo disponible hoy</span>
+            <span class="ds-kpi__value ds-money"><span class="ds-money__symbol">₲</span>184.320.500</span>
+            <span class="ds-kpi__meta">3 cajas · calculado, no almacenado</span>
+          </div>
+          <div class="ds-kpi ds-kpi--warning">
+            <span class="ds-kpi__label">Vence en 7 días</span>
+            <span class="ds-kpi__value ds-money"><span class="ds-money__symbol">₲</span>42.750.000</span>
+            <span class="ds-kpi__meta">9 cuotas · 4 proveedores</span>
+          </div>
+          <div class="ds-kpi ds-kpi--negative">
+            <span class="ds-kpi__label">Vencido</span>
+            <span class="ds-kpi__value ds-money ds-money--neg"><span class="ds-money__symbol">₲</span>7.900.000</span>
+            <span class="ds-kpi__meta">2 cuotas · la más antigua hace 12 días</span>
+          </div>
+          <div class="ds-kpi ds-kpi--positive">
+            <span class="ds-kpi__label">Por cobrar este mes</span>
+            <span class="ds-kpi__value ds-money"><span class="ds-money__symbol">₲</span>96.400.000</span>
+            <span class="ds-kpi__meta">14 cuotas · 11 clientes</span>
+          </div>
+        </div>
+
+        <div class="ds-grid-2">
+          <section class="ds-card">
+            <header class="ds-card__header">
+              <h3 class="ds-section">Saldo por caja</h3>
+              <button class="ds-btn ds-btn--ghost ds-btn--sm">Ver libro</button>
+            </header>
+            <div class="ds-card__body ds-card__body--flush">
+              <div class="ds-table-wrap" style="border:0">
+                <table class="ds-table">
+                  <thead>
+                    <tr><th scope="col">Caja</th><th scope="col">Moneda</th><th scope="col" class="is-num">Saldo</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Caja general</td><td><span class="ds-cur ds-cur--pyg">PYG</span></td><td class="is-num is-strong ds-money">₲ 12.480.500</td></tr>
+                    <tr><td>Banco Continental · cta. cte.</td><td><span class="ds-cur ds-cur--pyg">PYG</span></td><td class="is-num is-strong ds-money">₲ 171.840.000</td></tr>
+                    <tr><td>Banco Itaú · cuenta USD</td><td><span class="ds-cur ds-cur--usd">USD</span></td><td class="is-num is-strong ds-money">US$ 14.250<span class="ds-money__decimals">,00</span></td></tr>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="2">Total en PYG · cotización del 09/03/2026</td>
+                      <td class="is-num ds-money">₲ 288.145.500</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+            <footer class="ds-card__footer">
+              US$ convertido a ₲ 7.940 por dólar. El total nunca suma monedas distintas sin mostrar la tasa.
+            </footer>
+          </section>
+
+          <section class="ds-card">
+            <header class="ds-card__header"><h3 class="ds-section">Entradas y salidas · marzo 2026</h3></header>
+            <div class="ds-card__body ds-stack">
+              <div class="ds-stack-2">
+                <div class="ds-row"><span class="ds-secondary">Entradas</span><span class="ds-push ds-money ds-money--pos">+ ₲ 128.900.000</span></div>
+                <div class="ds-progress"><div class="ds-progress__bar" style="width:100%"></div></div>
+              </div>
+              <div class="ds-stack-2">
+                <div class="ds-row"><span class="ds-secondary">Salidas</span><span class="ds-push ds-money ds-money--neg">− ₲ 96.430.000</span></div>
+                <div class="ds-progress ds-progress--warning"><div class="ds-progress__bar" style="width:75%"></div></div>
+              </div>
+              <hr class="ds-divider" />
+              <div class="ds-row">
+                <span class="ds-section">Resultado del mes</span>
+                <span class="ds-push ds-money ds-money--pos" style="font-size:var(--fs-xl)">+ ₲ 32.470.000</span>
+              </div>
+              <p class="ds-help">Comparado con febrero 2026: <strong style="color:var(--positive)">+18%</strong>. Incluye 74 movimientos, ninguno pendiente de conciliación.</p>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <!-- ============ 2 · CUENTAS POR PAGAR ============ -->
+      <section class="demo-section" id="pagar">
+        <header>
+          <span class="demo-eyebrow">Pantalla 02</span>
+          <h2 class="ds-subtitle">Cuentas por Pagar</h2>
+          <p class="demo-note">La lista donde el cliente vive. Estado derivado de la fecha y de las bajas, urgencia marcada también sin color, números tabulares alineados a la derecha.</p>
+        </header>
+
+        <div class="ds-tabs" role="tablist">
+          <button class="ds-tab" role="tab" aria-selected="false">Todas <span class="ds-tab__count">128</span></button>
+          <button class="ds-tab" role="tab" aria-selected="true">Abiertas <span class="ds-tab__count">37</span></button>
+          <button class="ds-tab" role="tab" aria-selected="false">Vencidas <span class="ds-tab__count">2</span></button>
+          <button class="ds-tab" role="tab" aria-selected="false">Pagadas <span class="ds-tab__count">89</span></button>
+          <button class="ds-tab" role="tab" aria-selected="false">Canceladas <span class="ds-tab__count">0</span></button>
+        </div>
+
+        <div class="ds-filters">
+          <div class="ds-field">
+            <label class="ds-label" for="f1">Vencimiento desde</label>
+            <input class="ds-input" id="f1" inputmode="numeric" value="01/03/2026" />
+          </div>
+          <div class="ds-field">
+            <label class="ds-label" for="f2">hasta</label>
+            <input class="ds-input" id="f2" inputmode="numeric" value="31/03/2026" />
+          </div>
+          <div class="ds-field">
+            <label class="ds-label" for="f3">Proveedor</label>
+            <select class="ds-select" id="f3"><option>Todos</option><option>Distribuidora Ypacaraí</option></select>
+          </div>
+          <div class="ds-field">
+            <label class="ds-label" for="f4">Centro de costo</label>
+            <select class="ds-select" id="f4"><option>Todos</option><option>Administración</option></select>
+          </div>
+          <div class="ds-filters__actions">
+            <button class="ds-btn ds-btn--ghost">Limpiar</button>
+            <button class="ds-btn ds-btn--primary">Aplicar</button>
+          </div>
+        </div>
+
+        <div class="ds-table-wrap">
+          <table class="ds-table ds-table--cards">
+            <thead>
+              <tr>
+                <th scope="col">Vencimiento</th>
+                <th scope="col">Proveedor</th>
+                <th scope="col">Descripción</th>
+                <th scope="col">Cuota</th>
+                <th scope="col" class="is-num">Valor</th>
+                <th scope="col" class="is-num">Pagado</th>
+                <th scope="col" class="is-num">Saldo</th>
+                <th scope="col">Estado</th>
+                <th scope="col" class="is-actions">Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="is-overdue">
+                <td data-label="Vence"><strong>25/02/2026</strong><br /><span class="ds-help" style="color:var(--negative)">Vencido hace 12 días</span></td>
+                <td data-label="Proveedor">Distribuidora Ypacaraí S.R.L.</td>
+                <td data-label="Descripción" class="is-muted">Mercadería · Fact. 001-002-0004521</td>
+                <td data-label="Cuota">2 de 3</td>
+                <td data-label="Valor" class="is-num ds-money">₲ 5.000.000</td>
+                <td data-label="Pagado" class="is-num ds-money is-muted">₲ 0</td>
+                <td data-label="Saldo" class="is-num is-strong ds-money">₲ 5.000.000</td>
+                <td data-label="Estado"><span class="ds-badge ds-badge--vencido">Vencido</span></td>
+                <td class="is-actions"><button class="ds-btn ds-btn--primary ds-btn--sm" data-open-modal>Dar de baja</button></td>
+              </tr>
+              <tr class="is-overdue">
+                <td data-label="Vence"><strong>04/03/2026</strong><br /><span class="ds-help" style="color:var(--negative)">Vencido hace 5 días</span></td>
+                <td data-label="Proveedor">Ferretería San Blas</td>
+                <td data-label="Descripción" class="is-muted">Repuestos · sin documento</td>
+                <td data-label="Cuota">1 de 1</td>
+                <td data-label="Valor" class="is-num ds-money">₲ 2.900.000</td>
+                <td data-label="Pagado" class="is-num ds-money is-muted">₲ 0</td>
+                <td data-label="Saldo" class="is-num is-strong ds-money">₲ 2.900.000</td>
+                <td data-label="Estado"><span class="ds-badge ds-badge--vencido">Vencido</span></td>
+                <td class="is-actions"><button class="ds-btn ds-btn--secondary ds-btn--sm" data-open-modal>Dar de baja</button></td>
+              </tr>
+              <tr class="is-due-soon">
+                <td data-label="Vence"><strong>10/03/2026</strong><br /><span class="ds-help" style="color:var(--warning-strong)">Vence mañana</span></td>
+                <td data-label="Proveedor">ANDE</td>
+                <td data-label="Descripción" class="is-muted">Energía eléctrica · febrero</td>
+                <td data-label="Cuota">1 de 1</td>
+                <td data-label="Valor" class="is-num ds-money">₲ 3.480.000</td>
+                <td data-label="Pagado" class="is-num ds-money">₲ 1.480.000</td>
+                <td data-label="Saldo" class="is-num is-strong ds-money">₲ 2.000.000</td>
+                <td data-label="Estado">
+                  <span class="ds-badge ds-badge--parcial">Parcial</span>
+                  <div class="ds-progress ds-progress--warning" style="margin-top:6px"><div class="ds-progress__bar" style="width:43%"></div></div>
+                </td>
+                <td class="is-actions"><button class="ds-btn ds-btn--secondary ds-btn--sm" data-open-modal>Dar de baja</button></td>
+              </tr>
+              <tr>
+                <td data-label="Vence"><strong>15/03/2026</strong><br /><span class="ds-help">Vence en 6 días</span></td>
+                <td data-label="Proveedor">Importadora del Sur S.A.</td>
+                <td data-label="Descripción" class="is-muted">Insumos importados</td>
+                <td data-label="Cuota">1 de 2</td>
+                <td data-label="Valor" class="is-num ds-money">US$ 4.200<span class="ds-money__decimals">,00</span></td>
+                <td data-label="Pagado" class="is-num ds-money is-muted">US$ 0<span class="ds-money__decimals">,00</span></td>
+                <td data-label="Saldo" class="is-num is-strong ds-money">US$ 4.200<span class="ds-money__decimals">,00</span></td>
+                <td data-label="Estado"><span class="ds-badge ds-badge--abierto">Abierto</span></td>
+                <td class="is-actions"><button class="ds-btn ds-btn--secondary ds-btn--sm" data-open-modal>Dar de baja</button></td>
+              </tr>
+              <tr>
+                <td data-label="Vence"><strong>28/03/2026</strong><br /><span class="ds-help">Vence en 19 días</span></td>
+                <td data-label="Proveedor">Estudio Contable Riveros</td>
+                <td data-label="Descripción" class="is-muted">Honorarios · marzo</td>
+                <td data-label="Cuota">1 de 1</td>
+                <td data-label="Valor" class="is-num ds-money">₲ 3.200.000</td>
+                <td data-label="Pagado" class="is-num ds-money">₲ 3.200.000</td>
+                <td data-label="Saldo" class="is-num ds-money is-muted">₲ 0</td>
+                <td data-label="Estado"><span class="ds-badge ds-badge--pagado">Pagado</span></td>
+                <td class="is-actions"><button class="ds-btn ds-btn--ghost ds-btn--sm">Ver bajas</button></td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="4">5 cuotas en pantalla · totales por moneda, nunca sumadas entre sí</td>
+                <td class="is-num">₲ 14.580.000<br /><span class="ds-help">US$ 4.200,00</span></td>
+                <td class="is-num">₲ 4.680.000</td>
+                <td class="is-num">₲ 9.900.000<br /><span class="ds-help">US$ 4.200,00</span></td>
+                <td colspan="2"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="ds-pagination">
+          <span class="ds-pagination__info">Mostrando 1–5 de 37 cuotas abiertas</span>
+          <button class="ds-btn ds-btn--secondary ds-btn--sm" disabled>Anterior</button>
+          <button class="ds-btn ds-btn--secondary ds-btn--sm">Siguiente</button>
+        </div>
+      </section>
+
+      <!-- ============ 3 · BAJA Y REVERSIÓN ============ -->
+      <section class="demo-section" id="baja">
+        <header>
+          <span class="demo-eyebrow">Pantalla 03</span>
+          <h2 class="ds-subtitle">Baja parcial y reversión</h2>
+          <p class="demo-note">Las bajas son un libro: solo se agregan. La reversión no borra, agrega una línea que anula. La interfaz muestra el libro tal como es.</p>
+        </header>
+
+        <div class="ds-grid-2">
+          <section class="ds-card">
+            <header class="ds-card__header"><h3 class="ds-section">Historial de bajas · cuota 1 de 1 · ANDE</h3></header>
+            <div class="ds-card__body">
+              <ul class="ds-ledger">
+                <li class="ds-ledger__item">
+                  <span class="ds-ledger__dot"></span>
+                  <span>
+                    <strong class="ds-body">Baja parcial</strong>
+                    <span class="ds-ledger__meta">05/03/2026 · Caja general · registrado por M. Benítez</span>
+                  </span>
+                  <span class="ds-ledger__amount ds-money ds-money--pos">₲ 1.480.000</span>
+                </li>
+                <li class="ds-ledger__item ds-ledger__item--reversion">
+                  <span class="ds-ledger__dot"></span>
+                  <span>
+                    <strong class="ds-body">Reversión de la baja del 02/03</strong>
+                    <span class="ds-ledger__meta">03/03/2026 · motivo: cheque rechazado · registrado por M. Benítez</span>
+                  </span>
+                  <span class="ds-ledger__amount">₲ 900.000</span>
+                </li>
+                <li class="ds-ledger__item">
+                  <span class="ds-ledger__dot"></span>
+                  <span>
+                    <strong class="ds-body">Baja parcial</strong>
+                    <span class="ds-ledger__meta">02/03/2026 · Banco Continental · revertida el 03/03</span>
+                  </span>
+                  <span class="ds-ledger__amount ds-money">₲ 900.000</span>
+                </li>
+              </ul>
+            </div>
+            <footer class="ds-card__footer">
+              Saldo de la cuota = suma del libro. Nunca un campo editado a mano.
+            </footer>
+          </section>
+
+          <section class="ds-card" style="align-self:start">
+            <header class="ds-card__header"><h3 class="ds-section">Registrar baja</h3></header>
+            <div class="ds-card__body ds-stack">
+              <div class="ds-alert ds-alert--info">
+                <div class="ds-alert__body">
+                  <span class="ds-alert__title">Saldo de la cuota: ₲ 2.000.000</span>
+                  <span>Podés pagar menos: la cuota queda abierta con el resto.</span>
+                </div>
+              </div>
+              <div class="ds-form-grid">
+                <div class="ds-field ds-col-6">
+                  <label class="ds-label" for="b1">Fecha de pago</label>
+                  <input class="ds-input" id="b1" inputmode="numeric" value="09/03/2026" />
+                </div>
+                <div class="ds-field ds-col-6">
+                  <label class="ds-label" for="b2">Caja o banco</label>
+                  <select class="ds-select" id="b2"><option>Caja general (PYG)</option><option>Banco Continental (PYG)</option></select>
+                </div>
+                <div class="ds-field ds-col-6">
+                  <label class="ds-label" for="b3">Valor pagado</label>
+                  <div class="ds-money-input">
+                    <span class="ds-money-input__prefix">₲</span>
+                    <input class="ds-input" id="b3" inputmode="numeric" value="1.200.000" />
+                  </div>
+                  <span class="ds-field__hint">Sin centavos. El guaraní se escribe entero.</span>
+                </div>
+                <div class="ds-field ds-col-3">
+                  <label class="ds-label" for="b4">Intereses <span class="ds-label__optional">(opcional)</span></label>
+                  <div class="ds-money-input">
+                    <span class="ds-money-input__prefix">₲</span>
+                    <input class="ds-input" id="b4" inputmode="numeric" value="0" />
+                  </div>
+                </div>
+                <div class="ds-field ds-col-3 ds-field--error">
+                  <label class="ds-label" for="b5">Descuento</label>
+                  <div class="ds-money-input">
+                    <span class="ds-money-input__prefix">₲</span>
+                    <input class="ds-input" id="b5" inputmode="numeric" value="50.000,50" aria-invalid="true" />
+                  </div>
+                  <span class="ds-field__error">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.5v5.5M12 16.4v.2"/></svg>
+                    El guaraní no tiene centavos. Ingresá un valor entero.
+                  </span>
+                </div>
+                <div class="ds-field ds-col-12">
+                  <label class="ds-label" for="b6">Observación <span class="ds-label__optional">(opcional)</span></label>
+                  <textarea class="ds-textarea" id="b6" placeholder="Ej.: pago parcial acordado por teléfono con el proveedor."></textarea>
+                </div>
+              </div>
+            </div>
+            <footer class="ds-card__footer ds-row">
+              <span class="ds-help">Queda saldo: <strong class="ds-money">₲ 800.000</strong></span>
+              <span class="ds-push"></span>
+              <span class="ds-row ds-row--tight" style="flex-wrap:nowrap">
+                <button class="ds-btn ds-btn--ghost">Cancelar</button>
+                <button class="ds-btn ds-btn--primary">Confirmar baja</button>
+              </span>
+            </footer>
+          </section>
+        </div>
+      </section>
+
+      <!-- ============ 4 · CONSOLIDADO ============ -->
+      <section class="demo-section" id="consolidado">
+        <header>
+          <span class="demo-eyebrow">Pantalla 04</span>
+          <h2 class="ds-subtitle">Panel consolidado del grupo</h2>
+          <p class="demo-note">Nunca un total mudo: siempre valor por empresa, moneda de origen, tasa aplicada y qué quedó afuera.</p>
+        </header>
+
+        <div class="ds-alert ds-alert--warning">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex:none;margin-top:2px"><path d="M12 3.8 21 19.5H3L12 3.8Z"/><path d="M12 10v4M12 17.2v.2"/></svg>
+          <div class="ds-alert__body">
+            <span class="ds-alert__title">Reporte INCOMPLETO · falta cotización BRL → PYG del 28/02/2026</span>
+            <span>₲ 4.100.000 equivalentes quedaron fuera del total. No se convirtió con una tasa aproximada: el número faltante se muestra aparte.</span>
+          </div>
+        </div>
+
+        <div class="ds-table-wrap">
+          <table class="ds-table ds-table--cards">
+            <thead>
+              <tr>
+                <th scope="col">Empresa</th>
+                <th scope="col">Moneda funcional</th>
+                <th scope="col" class="is-num">Saldo en origen</th>
+                <th scope="col">Cotización aplicada</th>
+                <th scope="col" class="is-num">Equivalente en ₲</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td data-label="Empresa">Agroservicios del Este S.A.</td>
+                <td data-label="Moneda"><span class="ds-cur ds-cur--pyg">PYG</span></td>
+                <td data-label="Saldo" class="is-num ds-money">₲ 184.320.500</td>
+                <td data-label="Cotización" class="is-muted">—</td>
+                <td data-label="Equivalente" class="is-num is-strong ds-money">₲ 184.320.500</td>
+              </tr>
+              <tr>
+                <td data-label="Empresa">Import Paraná S.R.L.</td>
+                <td data-label="Moneda"><span class="ds-cur ds-cur--usd">USD</span></td>
+                <td data-label="Saldo" class="is-num ds-money">US$ 62.400<span class="ds-money__decimals">,00</span></td>
+                <td data-label="Cotización"><span class="ds-rate">1 USD = 7.940 PYG · 09/03/2026</span></td>
+                <td data-label="Equivalente" class="is-num is-strong ds-money">₲ 495.456.000</td>
+              </tr>
+              <tr>
+                <td data-label="Empresa">Transporte Ka'avó S.A.</td>
+                <td data-label="Moneda"><span class="ds-cur ds-cur--pyg">PYG</span></td>
+                <td data-label="Saldo" class="is-num ds-money">₲ 73.900.000</td>
+                <td data-label="Cotización" class="is-muted">—</td>
+                <td data-label="Equivalente" class="is-num is-strong ds-money">₲ 73.900.000</td>
+              </tr>
+              <tr>
+                <td data-label="Empresa">Comercial Ñu Guasu</td>
+                <td data-label="Moneda"><span class="ds-cur ds-cur--brl">BRL</span></td>
+                <td data-label="Saldo" class="is-num ds-money">R$ 3.180<span class="ds-money__decimals">,00</span></td>
+                <td data-label="Cotización"><span class="ds-rate ds-rate--missing">Sin cotización para 28/02/2026</span></td>
+                <td data-label="Equivalente" class="is-num"><span class="ds-badge ds-badge--incompleto">No convertido</span></td>
+              </tr>
+              <tr>
+                <td data-label="Empresa">Servicios Yvyrá S.A.</td>
+                <td data-label="Moneda"><span class="ds-cur ds-cur--pyg">PYG</span></td>
+                <td data-label="Saldo" class="is-num ds-money">₲ 21.045.000</td>
+                <td data-label="Cotización" class="is-muted">—</td>
+                <td data-label="Equivalente" class="is-num is-strong ds-money">₲ 21.045.000</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="4">Total consolidado · 4 de 5 empresas convertidas</td>
+                <td class="is-num ds-money" style="font-size:var(--fs-lg)">₲ 774.721.500</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ 5 · COLOR ============ -->
+      <section class="demo-section" id="fundamentos">
+        <header>
+          <span class="demo-eyebrow">Fundamentos</span>
+          <h2 class="ds-subtitle">Color</h2>
+          <p class="demo-note">
+            Azul tinta es la marca y la acción. Verde y rojo <em>solo</em> significan dinero que entra o sale —
+            nunca se usan para decorar. Ámbar avisa. El color nunca es la única señal: siempre lo acompaña un texto,
+            un signo o una marca de borde.
+          </p>
+        </header>
+
+        <div class="ds-stack">
+          <h3 class="ds-overline">Marca y acción</h3>
+          <div class="swatches">
+            <div class="swatch"><div class="swatch__chip" style="background:var(--blue-950)"></div><div class="swatch__meta"><span class="swatch__name">Tinta 950</span><span class="swatch__val">#071b2e</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--blue-900)"></div><div class="swatch__meta"><span class="swatch__name">Sidebar 900</span><span class="swatch__val">#0c2a45</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--blue-800)"></div><div class="swatch__meta"><span class="swatch__name">Marca 800</span><span class="swatch__val">#123a5c</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--blue-700)"></div><div class="swatch__meta"><span class="swatch__name">Acción 700</span><span class="swatch__val">#17496f</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--blue-100)"></div><div class="swatch__meta"><span class="swatch__name">Selección 100</span><span class="swatch__val">#dfeaf5</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--gold-500)"></div><div class="swatch__meta"><span class="swatch__name">Oro guaraní</span><span class="swatch__val">#c8961e</span></div></div>
+          </div>
+
+          <h3 class="ds-overline">Significado de valor</h3>
+          <div class="swatches">
+            <div class="swatch"><div class="swatch__chip" style="background:var(--green-600)"></div><div class="swatch__meta"><span class="swatch__name">Ingreso · crédito</span><span class="swatch__val">#0f7a46</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--red-600)"></div><div class="swatch__meta"><span class="swatch__name">Egreso · vencido</span><span class="swatch__val">#b3261e</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--amber-600)"></div><div class="swatch__meta"><span class="swatch__name">Por vencer</span><span class="swatch__val">#a86f05</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--slate-500)"></div><div class="swatch__meta"><span class="swatch__name">Neutro · cancelado</span><span class="swatch__val">#6f7d8d</span></div></div>
+          </div>
+
+          <h3 class="ds-overline">Superficies y texto</h3>
+          <div class="swatches">
+            <div class="swatch"><div class="swatch__chip" style="background:var(--bg-app);border-bottom:1px solid var(--border)"></div><div class="swatch__meta"><span class="swatch__name">Fondo app</span><span class="swatch__val">--bg-app</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--bg-surface);border-bottom:1px solid var(--border)"></div><div class="swatch__meta"><span class="swatch__name">Superficie</span><span class="swatch__val">--bg-surface</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--bg-sunken)"></div><div class="swatch__meta"><span class="swatch__name">Hundido</span><span class="swatch__val">--bg-sunken</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--slate-900)"></div><div class="swatch__meta"><span class="swatch__name">Texto</span><span class="swatch__val">--text</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--slate-600)"></div><div class="swatch__meta"><span class="swatch__name">Texto secundario</span><span class="swatch__val">--text-secondary</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--slate-200)"></div><div class="swatch__meta"><span class="swatch__name">Borde</span><span class="swatch__val">--border</span></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 6 · TIPOGRAFÍA Y DINERO ============ -->
+      <section class="demo-section" id="tipografia">
+        <header>
+          <span class="demo-eyebrow">Fundamentos</span>
+          <h2 class="ds-subtitle">Tipografía y dinero</h2>
+          <p class="demo-note">Inter con <code>tabular-nums</code> obligatorio en todo lo que sea número. Una columna de dinero tiene que alinear dígito con dígito, o el ojo no puede comparar.</p>
+        </header>
+
+        <div class="ds-card"><div class="ds-card__body spec">
+          <div class="spec__row"><span class="spec__key">--fs-4xl · 36px · 600</span><span class="ds-money ds-money--big">₲ 184.320.500</span></div>
+          <div class="spec__row"><span class="spec__key">--fs-3xl · 28px · KPI</span><span style="font-size:var(--fs-3xl);font-weight:600">₲ 42.750.000</span></div>
+          <div class="spec__row"><span class="spec__key">--fs-2xl · 22px · título</span><span class="ds-title">Cuentas por Pagar</span></div>
+          <div class="spec__row"><span class="spec__key">--fs-xl · 18px · card</span><span class="ds-subtitle">Saldo por caja</span></div>
+          <div class="spec__row"><span class="spec__key">--fs-lg · 16px · inputs</span><span style="font-size:var(--fs-lg)">Campos de formulario (evita el zoom en iOS)</span></div>
+          <div class="spec__row"><span class="spec__key">--fs-md · 14px · cuerpo</span><span class="ds-body">Texto de interfaz por defecto</span></div>
+          <div class="spec__row"><span class="spec__key">--fs-sm · 13px · tabla</span><span class="ds-secondary">Contenido de tablas densas</span></div>
+          <div class="spec__row"><span class="spec__key">--fs-xs · 12px · ayuda</span><span class="ds-help">Ayuda, metadatos, notas al pie</span></div>
+          <div class="spec__row"><span class="spec__key">--fs-2xs · 11px · rótulo</span><span class="ds-overline">Encabezado de columna</span></div>
+        </div></div>
+
+        <div class="demo-do">
+          <div class="demo-do__yes">
+            <h4>Así sí</h4>
+            <div class="ds-stack-2" style="font-variant-numeric:tabular-nums;text-align:right;max-width:220px">
+              <span class="ds-money">₲ 1.500.000</span>
+              <span class="ds-money">₲ 184.320.500</span>
+              <span class="ds-money">₲ 7.900</span>
+            </div>
+            <p class="ds-help">Guaraní entero, agrupado con punto, alineado a la derecha, tabular. Se puede comparar de un vistazo.</p>
+          </div>
+          <div class="demo-do__no">
+            <h4>Así no</h4>
+            <div class="ds-stack-2" style="font-family:var(--font-sans);font-variant-numeric:normal;max-width:220px;color:var(--text-muted)">
+              <span>₲ 1.500.000,00</span>
+              <span>Gs 184320500</span>
+              <span>7,900 ₲</span>
+            </div>
+            <p class="ds-help">Centavos que no existen, sin agrupar, símbolo al final, alineado a la izquierda. Tres formas de leer mal el mismo número.</p>
+          </div>
+        </div>
+
+        <div class="ds-card"><div class="ds-card__body ds-stack">
+          <h3 class="ds-section">Formato por moneda</h3>
+          <div class="ds-table-wrap" style="border:0">
+            <table class="ds-table">
+              <thead><tr><th>Moneda</th><th>Decimales</th><th>Ejemplo</th><th>Regla</th></tr></thead>
+              <tbody>
+                <tr><td><span class="ds-cur ds-cur--pyg">₲ PYG</span> Guaraní</td><td class="is-num">0</td><td class="is-num ds-money">₲ 1.500.000</td><td class="is-muted">Nunca decimales. Ni en pantalla ni en la entrada.</td></tr>
+                <tr><td><span class="ds-cur ds-cur--usd">US$ USD</span> Dólar</td><td class="is-num">2</td><td class="is-num ds-money">US$ 1.500<span class="ds-money__decimals">,00</span></td><td class="is-muted">Centavos en tono secundario.</td></tr>
+                <tr><td><span class="ds-cur ds-cur--brl">R$ BRL</span> Real</td><td class="is-num">2</td><td class="is-num ds-money">R$ 1.500<span class="ds-money__decimals">,00</span></td><td class="is-muted">Idem. Nunca se suma con las otras sin tasa.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="ds-help">Implementado en <code>src/design-system/format.ts</code>. La UI no formatea dinero a mano en ningún componente.</p>
+        </div></div>
+      </section>
+
+      <!-- ============ 7 · ESPACIO Y FORMA ============ -->
+      <section class="demo-section" id="espacio">
+        <header>
+          <span class="demo-eyebrow">Fundamentos</span>
+          <h2 class="ds-subtitle">Espacio, forma y elevación</h2>
+          <p class="demo-note">Base de 4 px. Radio pequeño en controles, grande en contenedores. Sombra solo cuando algo realmente flota sobre el contenido.</p>
+        </header>
+        <div class="ds-card"><div class="ds-card__body ds-stack">
+          <div class="demo-tiles">
+            <div class="tile"><div class="tile__box" style="width:4px;height:32px"></div>1</div>
+            <div class="tile"><div class="tile__box" style="width:8px;height:32px"></div>2</div>
+            <div class="tile"><div class="tile__box" style="width:12px;height:32px"></div>3</div>
+            <div class="tile"><div class="tile__box" style="width:16px;height:32px"></div>4</div>
+            <div class="tile"><div class="tile__box" style="width:24px;height:32px"></div>6</div>
+            <div class="tile"><div class="tile__box" style="width:32px;height:32px"></div>8</div>
+            <div class="tile"><div class="tile__box" style="width:48px;height:32px"></div>12</div>
+            <div class="tile"><div class="tile__box" style="width:64px;height:32px"></div>16</div>
+          </div>
+          <hr class="ds-divider" />
+          <div class="demo-tiles">
+            <div class="tile"><div class="tile__box" style="width:64px;height:48px;border-radius:var(--radius-xs)">&nbsp;</div>xs 4</div>
+            <div class="tile"><div class="tile__box" style="width:64px;height:48px;border-radius:var(--radius-sm)">&nbsp;</div>sm 6</div>
+            <div class="tile"><div class="tile__box" style="width:64px;height:48px;border-radius:var(--radius-md)">&nbsp;</div>md 8</div>
+            <div class="tile"><div class="tile__box" style="width:64px;height:48px;border-radius:var(--radius-lg)">&nbsp;</div>lg 12</div>
+            <div class="tile"><div class="tile__box" style="width:64px;height:48px;border-radius:var(--radius-xl)">&nbsp;</div>xl 16</div>
+            <div class="tile"><div class="tile__box" style="width:64px;height:48px;border-radius:var(--radius-pill)">&nbsp;</div>pill</div>
+          </div>
+          <hr class="ds-divider" />
+          <div class="demo-tiles">
+            <div class="tile"><div style="width:96px;height:56px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-md);box-shadow:var(--shadow-xs)"></div>xs · tarjetas</div>
+            <div class="tile"><div style="width:96px;height:56px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-md);box-shadow:var(--shadow-sm)"></div>sm · menú</div>
+            <div class="tile"><div style="width:96px;height:56px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-md);box-shadow:var(--shadow-md)"></div>md · toast</div>
+            <div class="tile"><div style="width:96px;height:56px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-md);box-shadow:var(--shadow-lg)"></div>lg · modal</div>
+          </div>
+        </div></div>
+      </section>
+
+      <!-- ============ 8 · COMPONENTES ============ -->
+      <section class="demo-section" id="componentes">
+        <header>
+          <span class="demo-eyebrow">Biblioteca</span>
+          <h2 class="ds-subtitle">Componentes</h2>
+        </header>
+
+        <div class="ds-card">
+          <header class="ds-card__header"><h3 class="ds-section">Botones</h3></header>
+          <div class="ds-card__body ds-stack">
+            <div class="ds-row">
+              <button class="ds-btn ds-btn--primary">Guardar cuenta</button>
+              <button class="ds-btn ds-btn--secondary">Cancelar</button>
+              <button class="ds-btn ds-btn--ghost">Ver detalle</button>
+              <button class="ds-btn ds-btn--reversion">Revertir baja</button>
+              <button class="ds-btn ds-btn--danger">Anular cuenta</button>
+              <button class="ds-btn ds-btn--primary" disabled>Sin permiso</button>
+            </div>
+            <div class="ds-row">
+              <button class="ds-btn ds-btn--primary ds-btn--lg">Acción principal grande</button>
+              <button class="ds-btn ds-btn--secondary">Tamaño normal</button>
+              <button class="ds-btn ds-btn--secondary ds-btn--sm">Pequeño</button>
+              <div class="ds-btn-group">
+                <button class="ds-btn ds-btn--secondary ds-btn--sm" aria-pressed="true">7 días</button>
+                <button class="ds-btn ds-btn--secondary ds-btn--sm" aria-pressed="false">15 días</button>
+                <button class="ds-btn ds-btn--secondary ds-btn--sm" aria-pressed="false">30 días</button>
+              </div>
+            </div>
+            <p class="ds-help">Borrar no existe como acción para movimientos con historial: se anula o se revierte, y queda registrado quién y cuándo.</p>
+          </div>
+        </div>
+
+        <div class="ds-card">
+          <header class="ds-card__header"><h3 class="ds-section">Estados</h3></header>
+          <div class="ds-card__body ds-row">
+            <span class="ds-badge ds-badge--abierto">Abierto</span>
+            <span class="ds-badge ds-badge--parcial">Parcial</span>
+            <span class="ds-badge ds-badge--vencido">Vencido</span>
+            <span class="ds-badge ds-badge--pagado">Pagado</span>
+            <span class="ds-badge ds-badge--cobrado">Cobrado</span>
+            <span class="ds-badge ds-badge--cancelado">Cancelado</span>
+            <span class="ds-badge ds-badge--reversion">Revertido</span>
+            <span class="ds-badge ds-badge--incompleto">Incompleto</span>
+          </div>
+          <footer class="ds-card__footer">Ningún estado se elige a mano: sale de la fecha de vencimiento y de la suma del libro de bajas.</footer>
+        </div>
+
+        <div class="ds-card">
+          <header class="ds-card__header"><h3 class="ds-section">Avisos</h3></header>
+          <div class="ds-card__body ds-stack">
+            <div class="ds-alert ds-alert--success"><div class="ds-alert__body"><span class="ds-alert__title">Baja registrada</span><span>Se generó el movimiento de caja N° 1.284 en Caja general.</span></div></div>
+            <div class="ds-alert ds-alert--warning"><div class="ds-alert__body"><span class="ds-alert__title">Falta cotización</span><span>El consolidado se muestra como INCOMPLETO hasta cargar la tasa del 28/02/2026.</span></div></div>
+            <div class="ds-alert ds-alert--danger"><div class="ds-alert__body"><span class="ds-alert__title">No se puede eliminar</span><span>Esta cuenta ya tiene bajas registradas. Podés anularla: el historial se conserva.</span></div></div>
+            <div class="ds-alert ds-alert--info"><div class="ds-alert__body"><span class="ds-alert__title">Importación disponible</span><span>Podés cargar clientes, proveedores y cuentas abiertas desde una planilla de Excel.</span></div></div>
+          </div>
+        </div>
+
+        <div class="ds-grid-2">
+          <div class="ds-card">
+            <header class="ds-card__header"><h3 class="ds-section">Resultado vacío</h3></header>
+            <div class="ds-card__body">
+              <div class="ds-empty">
+                <span class="ds-empty__icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M4 10h16M9 5v14"/></svg>
+                </span>
+                <span class="ds-empty__title">No hay cuentas que venzan entre el 01/03 y el 31/03</span>
+                <span class="ds-empty__text">El período seleccionado no tiene registros. No es un error del sistema: probá ampliar las fechas o revisar si la carga inicial ya se hizo.</span>
+                <button class="ds-btn ds-btn--secondary ds-btn--sm">Ver todo el año</button>
+              </div>
+            </div>
+            <footer class="ds-card__footer">Un cero mudo es indistinguible de un bug. Siempre se explica el porqué.</footer>
+          </div>
+
+          <div class="ds-card">
+            <header class="ds-card__header"><h3 class="ds-section">Carga</h3></header>
+            <div class="ds-card__body ds-stack">
+              <div class="ds-skeleton" style="width:40%"></div>
+              <div class="ds-skeleton" style="height:2.2em"></div>
+              <div class="ds-skeleton" style="width:75%"></div>
+              <div class="ds-skeleton" style="width:60%"></div>
+              <hr class="ds-divider" />
+              <div class="ds-toast ds-toast--success" style="position:static;box-shadow:none">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--positive)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:2px"><circle cx="12" cy="12" r="9.5"/><path d="m8 12.4 2.8 2.8L16 9.8"/></svg>
+                <div><div class="ds-toast__title">Movimiento guardado</div><div class="ds-secondary">Caja general · ₲ 1.200.000 · 09/03/2026</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 9 · REGLAS ============ -->
+      <section class="demo-section" id="reglas">
+        <header>
+          <span class="demo-eyebrow">Contrato</span>
+          <h2 class="ds-subtitle">Diez reglas que no se negocian</h2>
+        </header>
+        <div class="ds-card"><div class="ds-card__body">
+          <ol class="ds-stack-2" style="counter-reset:r">
+            <li class="ds-body">1 · El guaraní nunca muestra decimales, en ninguna pantalla, reporte o exportación.</li>
+            <li class="ds-body">2 · Todo número usa <code>tabular-nums</code> y va alineado a la derecha.</li>
+            <li class="ds-body">3 · Verde y rojo significan dinero. No se usan para decorar ni para marcas.</li>
+            <li class="ds-body">4 · Cada total muestra su moneda; monedas distintas nunca se suman sin tasa visible.</li>
+            <li class="ds-body">5 · Los estados se derivan del dato. Ningún campo de estado es editable.</li>
+            <li class="ds-body">6 · No existe "eliminar" para movimientos con historial: se anula o se revierte.</li>
+            <li class="ds-body">7 · Fechas siempre dd/mm/aaaa, con año entre 2000 y 2100 validado en la entrada.</li>
+            <li class="ds-body">8 · La pantalla siempre dice de cuándo es el dato que muestra.</li>
+            <li class="ds-body">9 · Un resultado vacío explica el motivo; nunca aparece un cero solitario.</li>
+            <li class="ds-body">10 · El foco del teclado siempre es visible y todo objetivo táctil mide al menos 44 px.</li>
+          </ol>
+        </div></div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ============ MODAL DEMO ============ -->
+<div class="ds-backdrop" id="modal" hidden>
+  <div class="ds-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <header class="ds-modal__header">
+      <h2 class="ds-modal__title" id="modal-title">Dar de baja · cuota 2 de 3</h2>
+      <button class="ds-btn ds-btn--ghost ds-btn--icon ds-modal__close" data-close-modal aria-label="Cerrar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </header>
+    <div class="ds-modal__body">
+      <div class="ds-alert ds-alert--danger">
+        <div class="ds-alert__body">
+          <span class="ds-alert__title">Cuota vencida hace 12 días</span>
+          <span>Distribuidora Ypacaraí S.R.L. · vencimiento 25/02/2026</span>
+        </div>
+      </div>
+      <div class="ds-form-grid">
+        <div class="ds-field ds-col-6">
+          <label class="ds-label" for="m1">Fecha de pago</label>
+          <input class="ds-input" id="m1" value="09/03/2026" inputmode="numeric" />
+        </div>
+        <div class="ds-field ds-col-6">
+          <label class="ds-label" for="m2">Caja o banco</label>
+          <select class="ds-select" id="m2"><option>Banco Continental (PYG)</option><option>Caja general (PYG)</option></select>
+        </div>
+        <div class="ds-field ds-col-12">
+          <label class="ds-label" for="m3">Valor pagado</label>
+          <div class="ds-money-input">
+            <span class="ds-money-input__prefix">₲</span>
+            <input class="ds-input" id="m3" value="5.000.000" inputmode="numeric" />
+          </div>
+          <span class="ds-field__hint">Saldo de la cuota: ₲ 5.000.000. Podés pagar menos.</span>
+        </div>
+      </div>
+    </div>
+    <footer class="ds-modal__footer">
+      <button class="ds-btn ds-btn--ghost" data-close-modal>Cancelar</button>
+      <button class="ds-btn ds-btn--primary" data-close-modal>Confirmar baja</button>
+    </footer>
+  </div>
+</div>
+
+<script>
+  const root = document.documentElement;
+
+  document.getElementById('theme').addEventListener('click', (e) => {
+    const dark = root.getAttribute('data-theme') === 'dark';
+    root.setAttribute('data-theme', dark ? 'light' : 'dark');
+    e.currentTarget.textContent = dark ? 'Modo oscuro' : 'Modo claro';
+  });
+
+  document.querySelectorAll('[data-density-set]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      root.setAttribute('data-density', btn.dataset.densitySet);
+      document.querySelectorAll('[data-density-set]').forEach((b) =>
+        b.setAttribute('aria-pressed', String(b === btn)));
+    });
+  });
+
+  document.getElementById('menu').addEventListener('click', () => {
+    const sb = document.getElementById('sidebar');
+    sb.dataset.open = sb.dataset.open === 'true' ? 'false' : 'true';
+  });
+
+  const modal = document.getElementById('modal');
+  document.querySelectorAll('[data-open-modal]').forEach((b) =>
+    b.addEventListener('click', () => { modal.hidden = false; }));
+  document.querySelectorAll('[data-close-modal]').forEach((b) =>
+    b.addEventListener('click', () => { modal.hidden = true; }));
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.hidden = true; });
+
+  document.querySelectorAll('.ds-tab').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      tab.parentElement.querySelectorAll('.ds-tab').forEach((t) =>
+        t.setAttribute('aria-selected', String(t === tab)));
+    });
+  });
+</script>
+</body>
+</html>

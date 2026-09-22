@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Syry">
+  <title>Syry — marca</title>
+  <rect width="512" height="512" rx="116" fill="#17496f"/>
+  <path d="M96 420C180 420 180 340 260 340S340 300 416 300" fill="none" stroke="#ffffff" stroke-width="24" stroke-linecap="round" opacity="0.38"/>
+  <path d="M96 366C180 366 180 226 260 226S340 128 416 128" fill="none" stroke="#ffffff" stroke-width="48" stroke-linecap="round"/>
+  <circle cx="416" cy="128" r="40" fill="#e8c974"/>
+</svg>

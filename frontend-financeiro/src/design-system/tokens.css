@@ -1,0 +1,275 @@
+/* =============================================================================
+   Design System — Finanzas del Grupo (Paraguay)
+   01 · TOKENS
+   -----------------------------------------------------------------------------
+   Regras de ouro deste sistema:
+   1. Dinheiro é o conteúdo principal: números têm tipografia, alinhamento e cor
+      próprios. Tudo o mais é moldura.
+   2. PYG não tem centavos. A UI nunca mostra casa decimal em guaraní.
+   3. Cor de marca (azul) nunca é usada para indicar valor positivo/negativo.
+      Verde = entrada, vermelho = saída, âmbar = por vencer. Sempre com rótulo
+      ou sinal junto — cor nunca é o único sinal.
+   4. Nada de gradiente, sombra pesada ou animação decorativa. É uma ferramenta
+      de trabalho diário para quem vem do papel.
+   ============================================================================ */
+
+:root {
+  color-scheme: light;
+
+  /* ---------------------------------------------------------------------------
+     COR — escalas cruas (não use direto na UI; use os tokens semânticos abaixo)
+     ------------------------------------------------------------------------ */
+
+  /* Marca · Azul Tinta — confiança, extrato bancário, sobriedade */
+  --blue-50:  #f1f6fb;
+  --blue-100: #dfeaf5;
+  --blue-200: #bed6ea;
+  --blue-300: #8bb6d6;
+  --blue-400: #5390bd;
+  --blue-500: #2f72a3;
+  --blue-600: #1e5c8a;
+  --blue-700: #17496f;
+  --blue-800: #123a5c;
+  --blue-900: #0c2a45;
+  --blue-950: #071b2e;
+
+  /* Neutros — levemente frios, papel de escritório */
+  --slate-0:   #ffffff;
+  --slate-25:  #fafbfc;
+  --slate-50:  #f4f6f8;
+  --slate-100: #eaeef2;
+  --slate-200: #dbe1e8;
+  --slate-300: #c2cbd6;
+  --slate-400: #97a3b2;
+  --slate-500: #6f7d8d;
+  --slate-600: #556270;
+  --slate-700: #414d59;
+  --slate-800: #2c3742;
+  --slate-900: #1b232c;
+  --slate-950: #0f151b;
+
+  /* Positivo · Ingreso / Crédito / Cobrado */
+  --green-50:  #eaf6ef;
+  --green-100: #cfeadc;
+  --green-200: #a3d6bd;
+  --green-500: #1a9159;
+  --green-600: #0f7a46;
+  --green-700: #0b6138;
+  --green-800: #084a2b;
+
+  /* Negativo · Egreso / Débito / Vencido */
+  --red-50:  #fdefee;
+  --red-100: #fbdcd9;
+  --red-200: #f5b8b2;
+  --red-500: #d1372c;
+  --red-600: #b3261e;
+  --red-700: #8f1c16;
+  --red-800: #6d1511;
+
+  /* Atenção · Por vencer / pendente de conferência */
+  --amber-50:  #fdf5e6;
+  --amber-100: #fbe9c4;
+  --amber-200: #f3d590;
+  --amber-500: #c98a08;
+  --amber-600: #a86f05;
+  --amber-700: #855704;
+
+  /* Ouro Guaraní — acento de marca, uso raro (logo, destaque de consolidado) */
+  --gold-300: #e8c974;
+  --gold-500: #c8961e;
+  --gold-700: #8e6710;
+
+  /* ---------------------------------------------------------------------------
+     COR — tokens semânticos (é o que a UI usa)
+     ------------------------------------------------------------------------ */
+
+  /* Superfícies */
+  --bg-app:        var(--slate-50);
+  --bg-surface:    var(--slate-0);
+  --bg-raised:     var(--slate-0);
+  --bg-sunken:     var(--slate-100);
+  --bg-subtle:     var(--slate-25);
+  --bg-hover:      var(--slate-50);
+  --bg-selected:   var(--blue-50);
+  --bg-inverse:    var(--blue-900);
+  --bg-backdrop:   rgb(12 42 69 / 0.55);
+
+  /* Bordas */
+  --border-subtle: var(--slate-100);
+  --border:        var(--slate-200);
+  --border-strong: var(--slate-300);
+  --border-inverse: rgb(255 255 255 / 0.14);
+
+  /* Texto */
+  --text:            var(--slate-900);
+  --text-secondary:  var(--slate-600);
+  --text-muted:      var(--slate-500);
+  --text-disabled:   var(--slate-400);
+  --text-inverse:    var(--slate-0);
+  --text-inverse-secondary: rgb(255 255 255 / 0.72);
+  --text-link:       var(--blue-700);
+
+  /* Ação primária */
+  --accent:          var(--blue-700);
+  --accent-hover:    var(--blue-800);
+  --accent-active:   var(--blue-900);
+  --accent-subtle:   var(--blue-50);
+  --accent-border:   var(--blue-200);
+  --accent-text:     var(--blue-800);
+  --on-accent:       var(--slate-0);
+
+  /* Semântica de valor e de estado */
+  --positive:        var(--green-600);
+  --positive-strong: var(--green-700);
+  --positive-subtle: var(--green-50);
+  --positive-border: var(--green-200);
+
+  --negative:        var(--red-600);
+  --negative-strong: var(--red-700);
+  --negative-subtle: var(--red-50);
+  --negative-border: var(--red-200);
+
+  --warning:         var(--amber-600);
+  --warning-strong:  var(--amber-700);
+  --warning-subtle:  var(--amber-50);
+  --warning-border:  var(--amber-200);
+
+  --neutral-subtle:  var(--slate-100);
+  --neutral-border:  var(--slate-300);
+
+  /* Foco — sempre visível, nunca removido */
+  --focus-ring: 0 0 0 2px var(--bg-surface), 0 0 0 4px var(--blue-500);
+
+  /* Navegação lateral — é sempre uma superfície escura, nos dois temas.
+     Por isso tem tokens próprios: não herda `--text-inverse`. */
+  --sidebar-bg:        var(--blue-900);
+  --sidebar-fg:        #ffffff;
+  --sidebar-fg-muted:  rgb(255 255 255 / 0.68);
+  --sidebar-border:    rgb(255 255 255 / 0.14);
+  --sidebar-hover:     rgb(255 255 255 / 0.08);
+  --sidebar-active:    rgb(255 255 255 / 0.16);
+
+  /* Moedas — identidade discreta para nunca confundir totais no consolidado */
+  --cur-pyg-bg: var(--blue-50);     --cur-pyg-fg: var(--blue-800);   --cur-pyg-bd: var(--blue-200);
+  --cur-usd-bg: var(--green-50);    --cur-usd-fg: var(--green-800);  --cur-usd-bd: var(--green-200);
+  --cur-brl-bg: var(--amber-50);    --cur-brl-fg: var(--amber-700);  --cur-brl-bd: var(--amber-200);
+
+  /* ---------------------------------------------------------------------------
+     TIPOGRAFIA
+     ------------------------------------------------------------------------ */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-num:  'Inter', ui-sans-serif, system-ui, sans-serif; /* + tabular-nums */
+  --font-mono: ui-monospace, 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+
+  /* Escala — passo pequeno em cima (densidade), grande embaixo (números) */
+  --fs-2xs: 0.6875rem; /* 11px · rótulos de tabela, chips */
+  --fs-xs:  0.75rem;   /* 12px · legendas, ajuda */
+  --fs-sm:  0.8125rem; /* 13px · texto de tabela */
+  --fs-md:  0.875rem;  /* 14px · corpo padrão da UI */
+  --fs-lg:  1rem;      /* 16px · inputs (evita zoom no iOS), corpo confortável */
+  --fs-xl:  1.125rem;  /* 18px · título de card */
+  --fs-2xl: 1.375rem;  /* 22px · título de tela */
+  --fs-3xl: 1.75rem;   /* 28px · KPI secundário */
+  --fs-4xl: 2.25rem;   /* 36px · saldo principal */
+
+  --lh-tight: 1.15;
+  --lh-snug:  1.3;
+  --lh-base:  1.5;
+
+  --fw-regular: 400;
+  --fw-medium:  500;
+  --fw-semibold: 600;
+  --fw-bold:    700;
+
+  --tracking-caps: 0.06em;
+
+  /* ---------------------------------------------------------------------------
+     ESPAÇO — base 4px
+     ------------------------------------------------------------------------ */
+  --sp-0: 0;
+  --sp-1: 0.25rem;   /*  4 */
+  --sp-2: 0.5rem;    /*  8 */
+  --sp-3: 0.75rem;   /* 12 */
+  --sp-4: 1rem;      /* 16 */
+  --sp-5: 1.25rem;   /* 20 */
+  --sp-6: 1.5rem;    /* 24 */
+  --sp-8: 2rem;      /* 32 */
+  --sp-10: 2.5rem;   /* 40 */
+  --sp-12: 3rem;     /* 48 */
+  --sp-16: 4rem;     /* 64 */
+
+  /* ---------------------------------------------------------------------------
+     FORMA
+     ------------------------------------------------------------------------ */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-pill: 999px;
+
+  --border-width: 1px;
+
+  /* Sombras — só onde algo realmente flutua */
+  --shadow-xs: 0 1px 2px rgb(12 42 69 / 0.06);
+  --shadow-sm: 0 1px 3px rgb(12 42 69 / 0.08), 0 1px 2px rgb(12 42 69 / 0.04);
+  --shadow-md: 0 4px 12px rgb(12 42 69 / 0.10), 0 1px 3px rgb(12 42 69 / 0.06);
+  --shadow-lg: 0 16px 40px rgb(12 42 69 / 0.16), 0 4px 12px rgb(12 42 69 / 0.08);
+
+  /* ---------------------------------------------------------------------------
+     DENSIDADE — [data-density="compact"] no <html> ou em qualquer container
+     ------------------------------------------------------------------------ */
+  --row-h:      44px;   /* linha de tabela e altura de controle */
+  --row-pad-y:  0.5rem;
+  --control-h:  40px;
+  --control-h-sm: 32px;
+  --tap-min:    44px;   /* alvo mínimo de toque no celular */
+
+  /* ---------------------------------------------------------------------------
+     LAYOUT
+     ------------------------------------------------------------------------ */
+  --sidebar-w: 248px;
+  --sidebar-w-collapsed: 64px;
+  --topbar-h: 56px;
+  --content-max: 1440px;
+  --form-max: 720px;
+
+  /* ---------------------------------------------------------------------------
+     MOVIMENTO — curto e funcional
+     ------------------------------------------------------------------------ */
+  --dur-instant: 80ms;
+  --dur-fast: 120ms;
+  --dur-base: 180ms;
+  --dur-slow: 240ms;
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ---------------------------------------------------------------------------
+     CAMADAS
+     ------------------------------------------------------------------------ */
+  --z-base: 0;
+  --z-sticky: 100;
+  --z-drawer: 200;
+  --z-modal: 300;
+  --z-popover: 400;
+  --z-toast: 500;
+}
+
+/* --- Densidade compacta: tabelas longas em telas grandes ------------------- */
+[data-density='compact'] {
+  --row-h: 36px;
+  --row-pad-y: 0.3125rem;
+  --control-h: 34px;
+  --control-h-sm: 28px;
+}
+
+/* --- Tema escuro removido por decisão do produto --------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-instant: 0ms;
+    --dur-fast: 0ms;
+    --dur-base: 0ms;
+    --dur-slow: 0ms;
+  }
+}

@@ -1,0 +1,6 @@
+/* Design System — Finanzas del Grupo (Paraguay)
+   Ponto de entrada único: importe este arquivo no `main.tsx`.
+   import './design-system/index.css';
+*/
+@import './tokens.css';
+@import './components.css';

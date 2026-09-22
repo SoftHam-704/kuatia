@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 200" width="760" height="200" role="img" aria-label="Syry · Flujo de caja del grupo">
+  <title>Syry — lockup horizontal</title>
+  <g transform="translate(0,36) scale(0.25)">
+    <rect width="512" height="512" rx="116" fill="#17496f"/>
+    <path d="M96 420C180 420 180 340 260 340S340 300 416 300" fill="none" stroke="#ffffff" stroke-width="24" stroke-linecap="round" opacity="0.38"/>
+    <path d="M96 366C180 366 180 226 260 226S340 128 416 128" fill="none" stroke="#ffffff" stroke-width="48" stroke-linecap="round"/>
+    <circle cx="416" cy="128" r="40" fill="#e8c974"/>
+  </g>
+  <text x="164" y="112" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="76" font-weight="700" letter-spacing="-1.5" fill="#123a5c">Syry</text>
+  <text x="167" y="148" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="20" font-weight="600" letter-spacing="3.4" fill="#556270">FLUJO DE CAJA</text>
+</svg>

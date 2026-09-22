@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Aty">
+  <title>Aty — marca</title>
+  <rect width="512" height="512" rx="116" fill="#0c2a45"/>
+  <g fill="#ffffff">
+    <rect x="96"  y="276" width="48" height="140" rx="24" opacity="0.55"/>
+    <rect x="164" y="206" width="48" height="210" rx="24" opacity="0.72"/>
+    <rect x="232" y="240" width="48" height="176" rx="24" opacity="0.62"/>
+    <rect x="368" y="184" width="48" height="232" rx="24" opacity="0.85"/>
+  </g>
+  <rect x="300" y="128" width="48" height="288" rx="24" fill="#c8961e"/>
+  <rect x="96" y="432" width="320" height="20" rx="10" fill="#ffffff" opacity="0.9"/>
+</svg>
